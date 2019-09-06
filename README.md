@@ -32,7 +32,15 @@ The BB Promster should be used in the context of the Big Brother project, where 
 
 3. with the help of our [etcd-registrar](https://github.com/flaviostutz/etcd-registrar) or [etcd-registry](https://github.com/flaviostutz/etcd-registry), registers itself at an etcd cluster for automatic scraping ;
 
-**Important**: The top-level bb-promster needs to have only one instance running and its `/federate` endpoint exposed to the public internet.
+# Federation
+
+The BB Promster also leverages the federation features implemented by Promster (and Prometheus), allowing your observability cluster to scale together with your service instances.
+
+Prometheus federation is the concept of clustering prometheus instances to allow the handling of huge metric loads. 
+
+Ultimately, it ends up in a tree layout with a top-layer, any number of middle layers, and a end layer of prometheus hitting your `/metrics` endpoint directly.
+
+In the context of the Big Brother Project, this top-layer will also be federated by Big Brother, meaning that the `/federate` endpoint needs to be exposed to the public internet.
 
 # Configuration
 
@@ -52,7 +60,7 @@ All other configurations from Promster itself and Prometheus are still available
 
 # Example
 
-This repository also comes with a example. Just go to your terminal and type:
+This repository also comes with an example. Just go to your terminal and type:
 
 ```
 > docker-compose up
