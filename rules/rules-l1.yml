@@ -1,0 +1,27 @@
+groups:
+- name: l1
+  rules:
+  - record: http_requests_seconds_bucket:irate
+    expr: sum(irate(http_requests_seconds_bucket[10m])) without (job, instance)
+    labels:
+      job: l1
+  
+  - record: http_requests_seconds_count:irate
+    expr: sum(irate(http_requests_seconds_count[10m])) without (job, instance)
+    labels:
+      job: l1
+
+  - record: http_requests_seconds_sum:irate
+    expr: sum(irate(http_requests_seconds_sum[10m])) without (job, instance)
+    labels:
+      job: l1
+
+  - record: http_response_size_bytes:irate
+    expr: sum(irate(http_response_size_bytes[10m])) without (job, instance)
+    labels:
+      job: l1
+
+  - record: dependency_up
+    expr: dependency_up
+    labels:
+      job: l1
