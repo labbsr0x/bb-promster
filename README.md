@@ -30,7 +30,9 @@ The BB Promster should be used in the context of the Big Brother project, where 
 
 2. have all the metrics listed above exposed;
 
-3. registers itself at an etcd cluster for automatic scraping;
+3. with the help of our [etcd-registrar](https://github.com/flaviostutz/etcd-registrar) or [etcd-registry](https://github.com/flaviostutz/etcd-registry), registers itself at an etcd cluster for automatic scraping ;
+
+**Important**: The top-level bb-promster needs to have only one instance running and its `/federate` endpoint exposed to the public internet.
 
 # Configuration
 
@@ -46,7 +48,35 @@ If you have a scenario where you have different etcd clusters for scraping insta
 
 2. **SCRAPE_ETCD_URL**: the etcd cluster urls where a service instance will register itself for scraping; 
 
-All other configurations from Promster itself and 
+All other configurations from Promster itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
 
+# Example
 
+This repository also comes with a example. Just go to your terminal and type:
+
+```
+> docker-compose up
+```
+
+This will lauch 5 services:
+
+1. an etcd registry;
+
+2. a node js express service instrumented with our `express-monitor` lib;
+
+3. a level 1 bb-promster instance that will scrape the exposed metrics at the service's `/metrics` endpoint;
+
+4. a level 2 bb-promster instance that will federate the level 1 bb-promster instances;
+
+5. a level 3 bb-promster instance that will federate the level 2 bb-promster instances;
+
+With this setup you can exercise some scenarios, such as:
+
+1. scaling up your service;
+
+2. scaling up level 1 bb-promster;
+
+3. scaling up level 2 bb-promster;
+
+Since level 3 is the top-level bb-promster, it needs to remains a sole instance. If you need to eventually scale it up, another level will need to be added so it can work properly with Big Brother.
 
