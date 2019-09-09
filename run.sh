@@ -1,5 +1,6 @@
 #!/bin/sh
 set -e
+set -x
 
 if [[ "$ETCD_URLS" != "" ]]; then
     export REGISTRY_ETCD_URL=$ETCD_URLS
@@ -38,7 +39,7 @@ if [[ $ll -ne 0 ]]; then
     export SCRAPE_ETCD_PATH="${REGISTRY_ETCD_BASE}/${SCRAPE_MATCH_REGEX}"
     export SCRAPE_PATHS="/federate"
 else
-    if [[ $SCRAPE_ETCD_PATH = "" ]]; then 
+    if [[ "$SCRAPE_ETCD_PATH" = "" ]]; then 
         echo "SCRAPE_ETCD_PATH cannot be empty for a Level 1 BB-PROMSTER instance" 1>&2
         exit 6
     fi
