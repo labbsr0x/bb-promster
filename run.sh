@@ -43,7 +43,10 @@ else
         echo "SCRAPE_ETCD_PATH cannot be empty for a Level 1 BB-PROMSTER instance" 1>&2
         exit 6
     fi
-    export SCRAPE_PATHS="/metrics"
+    if [[ "$SCRAPE_PATHS" = "" ]]; then 
+        # defaults to /metrics when not set by user
+        export SCRAPE_PATHS="/metrics"
+    fi
 fi
 
 if [[ "$SCRAPE_INTERVAL" = "" ]]; then
