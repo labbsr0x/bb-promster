@@ -21,6 +21,7 @@ scrape_configs:
     params:
       'match[]':
         - '{job="{{$scrapeMatch}}"}'
+        - '{__name__=~"dependency_up|up"}'
 {{end}}
     file_sd_configs:
       - files: 

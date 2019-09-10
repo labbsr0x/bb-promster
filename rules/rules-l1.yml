@@ -20,8 +20,3 @@ groups:
     expr: sum(irate(http_response_size_bytes[10m])) without (job, instance)
     labels:
       job: l1
-
-  - record: dependency_up
-    expr: dependency_up
-    labels:
-      job: l1
