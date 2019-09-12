@@ -13,7 +13,7 @@ services:
   example:
     image: abilioesteves/prom-expressjs
     ports:
-      - 23498:23498
+      - 23498
     environment:
       - REGISTRY_ETCD_URL=http://etcd:2379
 
@@ -21,7 +21,7 @@ services:
     build: .
     image: labbsr0x/bb-promster:latest
     ports:
-      - 9090:9090
+      - 9090
     environment:
       - BB_PROMSTER_LEVEL=1
       - ETCD_URLS=http://etcd:2379
@@ -32,7 +32,7 @@ services:
     depends_on:
       - bb-promster-l1
     ports:
-      - 9091:9090
+      - 9090
     environment:
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
@@ -42,7 +42,7 @@ services:
     depends_on:
       - bb-promster-l2
     ports:
-      - 9092:9090
+      - 9090
     environment:
       - BB_PROMSTER_LEVEL=3
       - ETCD_URLS=http://etcd:2379
