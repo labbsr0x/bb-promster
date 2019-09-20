@@ -86,5 +86,4 @@ With this setup you can exercise some scenarios, such as:
 
 3. scaling up level 2 bb-promster;
 
-Since level 3 is the top-level bb-promster, it needs to remains as a sole instance to keep a cohezive metrics state for Big Brother to consume. If you need to eventually scale it up, another level will need to be added so it can work properly with Big Brother.
 
