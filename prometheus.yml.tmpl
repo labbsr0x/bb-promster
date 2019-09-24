@@ -20,7 +20,7 @@ scrape_configs:
 {{if not (eq $scrapeMatch "")}}
     params:
       'match[]':
-        - '{job="{{$scrapeMatch}}"}'
+        - '{job=~"{{$scrapeMatch}}"}'
         - '{__name__=~"dependency_up|up"}'
 {{end}}
     file_sd_configs:
