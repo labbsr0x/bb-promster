@@ -1,18 +1,18 @@
 # Big Brother Promster
 
-This project defines custom [Promster](https://github.com/flaviostutz/promster) images to work with specific metrics defined by the Big Brother project.
+This project defines custom [Promster](https://github.com/flaviostutz/promster) images to work with specific metrics defined by the [Big Brother](https://github.com/labbsr0x/big-brother) project.
 
 The currently supported metrics are:
 
 ```
-http_requests_seconds_bucket{status, method, url, le}
-http_requests_seconds_count{status, method, url}
-http_requests_seconds_sum{status, method, url}
-http_response_size_bytes{status, method, url}
+request_seconds_bucket{type,status, method, addr, le}
+request_seconds_count{type, status, method, addr}
+request_seconds_sum{type, status, method, addr}
+response_size_bytes{type, status, method, addr}
 dependency_up{name}
 ```
 
-They can be easily generated with our monitor libraries. For now, we only have a [Node JS Express library](https://github.com/labbsr0x/express-monitor), but we'll soon support other stacks.
+These metrics can be easily generated with **Big Brother's** monitor libraries. Please check them out at the the main project.
 
 # How it works
 
