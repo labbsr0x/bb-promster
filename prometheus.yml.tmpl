@@ -13,10 +13,15 @@ scrape_configs:
     static_configs:
     - targets: ['localhost:9090']
 
+{{$scheme := .scheme}}
+{{$tlsInsecure := .tlsInsecure}}
 {{$scrapeMatch := .scrapeMatch}}
 {{range .scrapePaths}}
   - job_name: '{{.}}'
     metrics_path: {{.}}
+    scheme: {{$scheme}}
+    tls_config:
+      insecure_skip_verify: {{$tlsInsecure}}
 {{if not (eq $scrapeMatch "")}}
     params:
       'match[]':

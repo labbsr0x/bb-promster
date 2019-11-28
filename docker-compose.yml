@@ -26,6 +26,9 @@ services:
       - BB_PROMSTER_LEVEL=1
       - ETCD_URLS=http://etcd:2379
       - SCRAPE_ETCD_PATH=/services/example
+      # - TLS_INSECURE=true
+      # - SCRAPE_PATHS=/your-custom-metrics-path
+      # - SCHEME="https"
 
   bb-promster-l2:
     image: labbsr0x/bb-promster:latest
