@@ -23,9 +23,10 @@ services:
     ports:
       - 9090
     environment:
+      - REGISTRY_ETCD_BASE=/example-service
       - BB_PROMSTER_LEVEL=1
       - ETCD_URLS=http://etcd:2379
-      - SCRAPE_ETCD_PATH=/services/example
+      - SCRAPE_ETCD_PATH=/services/example # abilioesteves/prom-expressjs registers its IPs at this path by default
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
@@ -37,15 +38,7 @@ services:
     ports:
       - 9090
     environment:
+      - REGISTRY_ETCD_BASE=/example-service
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
-    
-  bb-promster-l3:
-    image: labbsr0x/bb-promster:latest
-    depends_on:
-      - bb-promster-l2
-    ports:
-      - 9090
-    environment:
-      - BB_PROMSTER_LEVEL=3
-      - ETCD_URLS=http://etcd:2379
+

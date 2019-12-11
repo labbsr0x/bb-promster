@@ -2,21 +2,21 @@ groups:
 - name: ln
   rules:
   - record: request_seconds_bucket:irate
-    expr: sum(request_seconds_bucket:irate{job!="l$BB_PROMSTER_LEVEL"}) without (job, instance)
+    expr: sum(request_seconds_bucket:irate{job!="$BB_PROMSTER_LEVEL"}) without (job, instance)
     labels:
-      job: l$BB_PROMSTER_LEVEL
+      job: $BB_PROMSTER_LEVEL
   
   - record: request_seconds_count:irate
-    expr: sum(request_seconds_count:irate{job!="l$BB_PROMSTER_LEVEL"}) without (job, instance)
+    expr: sum(request_seconds_count:irate{job!="$BB_PROMSTER_LEVEL"}) without (job, instance)
     labels:
-      job: l$BB_PROMSTER_LEVEL
+      job: $BB_PROMSTER_LEVEL
 
   - record: request_seconds_sum:irate
-    expr: sum(request_seconds_sum:irate{job!="l$BB_PROMSTER_LEVEL"}) without (job, instance)
+    expr: sum(request_seconds_sum:irate{job!="$BB_PROMSTER_LEVEL"}) without (job, instance)
     labels:
-      job: l$BB_PROMSTER_LEVEL
+      job: $BB_PROMSTER_LEVEL
 
   - record: response_size_bytes:irate
-    expr: sum(response_size_bytes:irate{job!="l$BB_PROMSTER_LEVEL"}) without (job, instance)
+    expr: sum(response_size_bytes:irate{job!="$BB_PROMSTER_LEVEL"}) without (job, instance)
     labels:
-      job: l$BB_PROMSTER_LEVEL
+      job: $BB_PROMSTER_LEVEL

@@ -44,19 +44,33 @@ In the context of the Big Brother Project, this top-layer will also be federated
 
 # Configuration
 
-The BB Promster docker image expects at least two different configurations:
+## What BB Promster expects
+The BB Promster docker image expects at least four different configurations:
 
-1. **BB_PROMSTER_LEVEL**: defines the level where a Promster instance lays on at your own Promster cluster. Level 1 is for Promster that hit your `/metrics` endpoint directly; Level 2+ is for Promsters that federate on each other. The federation happens for scalability issues. Once you have to scale up your app, things need to work a little bit differently. BB Promster comes to solve that issue;
+1. **BB_PROMSTER_LEVEL**: defines the level where a Promster instance lays on at your own Promster cluster topology. Level 1 is for BB-Promsters that hit your `/metrics` endpoint directly; Level 2+ is for Promsters that federate on each other. The federation happens for scalability issues. Once you have to scale up your app, things need to work a little bit differently. BB-Promster comes to solve those issues setting up by the default the appropriate recording rules;
 
-2. **ETCD_URLS**: defines the etcd cluster urls where service discovery is done for monitoring purposes. Here we assume that scraping instances and Promster instances will all register themselves at the same etcd registry. 
+2. **ETCD_URLS**: defines the etcd cluster urls where service discovery is done for monitoring purposes. Here we assume that scraping instances and Promster instances will all register themselves at the same etcd registry. **Important: all registered IPs or addresses must provide only the host name, without schema or paths. The metric paths and schema should be configured by other environment variables**;
 
-If you have a scenario where you have different etcd clusters for scraping instances and Promster instances, you can leave `ETCD_URLS` empty and define the following env:
+3. **REGISTRY_ETCD_BASE**: defines in which base path of the ETCD is grouped all the components to observe a specific application;
+
+4. **SCRAPE_ETCD_PATH**: this information tells level 1 BB-Promsters where to find the targets IP addresses at the provided ETCD installation. **Important: Mandatory only for level 1 BB-Promsters**;
+
+## Multiple ETCDs
+If you have a scenario where you have different ETCD clusters, one for registering Scraping instances and other for registering Promster instances, you can leave `ETCD_URLS` empty and define the following ENVs:
 
 1. **REGISTRY_ETCD_URL**: the etcd cluster urls where a Promster instance will register itself for federation;
 
 2. **SCRAPE_ETCD_URL**: the etcd cluster urls where a service instance will register itself for scraping; 
 
-All other configurations from Promster itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
+## Other Optional Configs
+
+1. **TLS_INSECURE**: informs Prometheus to ignore TLS verification;
+
+2. **SCHEME**: `http` (default) or `https`. Configure your level 1 BB-Promsters if your targets are only exposed at `https` endpoints and do not have automatic redirection from `http` to `https`;
+
+3. **SCRAPE_PATHS**: and, if your metrics path does not follow the default `/metrics`, you'll need to configure this variable to point to the exact path where your metrics are exposed;
+
+All other configurations from [Promster](https://github.com/flaviostutz/promster) itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
 
 # Example
 
@@ -66,17 +80,16 @@ This repository also comes with an example. Just go to your terminal and type:
 > docker-compose up
 ```
 
-This will lauch 5 services:
+This will lauch 4 services:
 
 1. an etcd registry;
 
-2. a node js express service instrumented with our `express-monitor` lib;
+2. a node js express service instrumented with our `express-monitor` lib that gets it's IPs registered to the `/services/example` ETCD path;
 
 3. a level 1 bb-promster instance that will scrape the exposed metrics at the service's `/metrics` endpoint;
 
 4. a level 2 bb-promster instance that will federate the level 1 bb-promster instances;
 
-5. a level 3 bb-promster instance that will federate the level 2 bb-promster instances;
 
 With this setup you can exercise some scenarios, such as:
 
@@ -84,6 +97,5 @@ With this setup you can exercise some scenarios, such as:
 
 2. scaling up level 1 bb-promster;
 
-3. scaling up level 2 bb-promster;
 
 

@@ -57,6 +57,6 @@ if [[ "$SCRAPE_TIMEOUT" = "" ]]; then
     export SCRAPE_TIMEOUT="$((BB_PROMSTER_LEVEL * 15))s"
 fi
 
-sed -i -e 's/$BB_PROMSTER_LEVEL/'"${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/rules-ln.yml"
+sed -i -e 's/$BB_PROMSTER_LEVEL/'"l${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/rules-ln.yml"
 
 sh /startup.sh # inherited from flaviostutz/promster
