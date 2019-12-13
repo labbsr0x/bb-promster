@@ -10,35 +10,78 @@ services:
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
 
-  example:
-    image: abilioesteves/prom-expressjs
+  example-1:
+    image: abilioesteves/metrics-generator
+    depends_on:
+      - etcd
     ports:
-      - 23498
+      - 32865
     environment:
       - REGISTRY_ETCD_URL=http://etcd:2379
+      - REGISTRY_SERVICE=example-1
 
-  bb-promster-l1:
+  # consider example-2 to be a completely different application from example-1
+  example-2:
+    image: abilioesteves/metrics-generator
+    depends_on: 
+      - etcd
+    ports:
+      - 32865
+    environment:
+      - REGISTRY_ETCD_URL=http://etcd:2379
+      - REGISTRY_SERVICE=example-2
+
+  bb-promster-1-l1:
     build: .
     image: labbsr0x/bb-promster:latest
+    depends_on: 
+      - example-1
     ports:
       - 9090
     environment:
-      - REGISTRY_ETCD_BASE=/example-service
+      - REGISTRY_ETCD_BASE=/example-1-promster
       - BB_PROMSTER_LEVEL=1
       - ETCD_URLS=http://etcd:2379
-      - SCRAPE_ETCD_PATH=/services/example # abilioesteves/prom-expressjs registers its IPs at this path by default
+      - SCRAPE_ETCD_PATH=/services/example-1 # based on how the examples are configured
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
 
-  bb-promster-l2:
+  bb-promster-1-l2:
     image: labbsr0x/bb-promster:latest
     depends_on:
-      - bb-promster-l1
+      - bb-promster-1-l1
     ports:
       - 9090
     environment:
-      - REGISTRY_ETCD_BASE=/example-service
+      - REGISTRY_ETCD_BASE=/example-2-promster
+      - BB_PROMSTER_LEVEL=2
+      - ETCD_URLS=http://etcd:2379
+
+  bb-promster-2-l1:
+    build: .
+    image: labbsr0x/bb-promster:latest
+    depends_on: 
+      - example-2
+    ports:
+      - 9090
+    environment:
+      - REGISTRY_ETCD_BASE=/example-2-promster
+      - BB_PROMSTER_LEVEL=1
+      - ETCD_URLS=http://etcd:2379
+      - SCRAPE_ETCD_PATH=/services/example-2 # based on how the examples are configured
+      # - TLS_INSECURE=true
+      # - SCRAPE_PATHS=/your-custom-metrics-path
+      # - SCHEME="https"
+
+  bb-promster-2-l2:
+    image: labbsr0x/bb-promster:latest
+    depends_on:
+      - bb-promster-2-l1
+    ports:
+      - 9090
+    environment:
+      - REGISTRY_ETCD_BASE=/example-2-promster
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
 
