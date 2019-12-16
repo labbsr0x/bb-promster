@@ -70,7 +70,9 @@ If you have a scenario where you have different ETCD clusters, one for registeri
 
 2. **SCHEME**: `http` (default) or `https`. Configure your level 1 BB-Promsters if your targets are only exposed at `https` endpoints and do not have automatic redirection from `http` to `https`;
 
-3. **SCRAPE_PATHS**: and, if your metrics path does not follow the default `/metrics`, you'll need to configure this variable to point to the exact path where your metrics are exposed;
+3. **SCRAPE_PATHS**: if your metrics path does not follow the default `/metrics`, you'll need to configure this variable to point to the exact path where your metrics are exposed;
+
+4. **CLEAR_RR**: the recording rules can be all removed if you wish. Just set the `CLEAR_RR` env to `true` and `bb-promster` will have it's set of recording rules deleted; 
 
 All other configurations from [Promster](https://github.com/flaviostutz/promster) itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
 

@@ -67,4 +67,10 @@ sed -i -e 's/$BB_PROMSTER_LEVEL/'"l${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/ru
 # If we don't do this, PRSN will get overritten and we loose that information
 export REGISTRY_ETCD_BASE="${REGISTRY_ETCD_BASE}-promster-l${BB_PROMSTER_LEVEL}"
 
+# the user has a option to clear the recording rules if desired
+if [[ "$CLEAR_RR" = "true" ]]; then 
+    rm /etc/prometheus/rules-l1.yml
+    rm /etc/prometheus/rules-ln.yml
+fi
+
 sh /startup.sh # inherited from flaviostutz/promster
