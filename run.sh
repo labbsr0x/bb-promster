@@ -22,6 +22,11 @@ if [[ "$REGISTRY_ETCD_BASE" = "" ]]; then
     exit 3
 fi
 
+if [[ "$REGISTRY_SERVICE" = "" ]]; then
+    echo "REGISTRY_SERVICE must NOT be empty" 1>&2
+    exit 3
+fi
+
 if [[ "$BB_PROMSTER_LEVEL" = "" ]]; then
     echo "BB_PROMSTER_LEVEL must NOT be empty" 1>&2
     exit 4
@@ -33,11 +38,10 @@ if [[ $((BB_PROMSTER_LEVEL)) -lt 1 ]]; then
 fi
 
 ll=$((BB_PROMSTER_LEVEL - 1))
-export REGISTRY_SERVICE="l${BB_PROMSTER_LEVEL}"
-if [[ $ll -ne 0 ]]; then 
-    export SCRAPE_MATCH_REGEX="l$ll"
-    export SCRAPE_ETCD_PATH="${REGISTRY_ETCD_BASE}/${SCRAPE_MATCH_REGEX}"
-    export SCRAPE_PATHS="/federate"
+if [[ $ll -ne 0 ]]; then # if true, we properly configure bb-promster to behave like a level-n promster
+    export SCRAPE_MATCH_REGEX="l$ll" # configure federation to look for (BB_PROMSTER_LVEL - 1) metrics
+    export SCRAPE_ETCD_PATH="${REGISTRY_ETCD_BASE}-promster-${SCRAPE_MATCH_REGEX}/${REGISTRY_SERVICE}" # configure where to look for federation targets
+    export SCRAPE_PATHS="/federate" # path to federate
 else
     if [[ "$SCRAPE_ETCD_PATH" = "" ]]; then 
         echo "SCRAPE_ETCD_PATH cannot be empty for a Level 1 BB-PROMSTER instance" 1>&2
@@ -58,5 +62,9 @@ if [[ "$SCRAPE_TIMEOUT" = "" ]]; then
 fi
 
 sed -i -e 's/$BB_PROMSTER_LEVEL/'"l${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/rules-ln.yml"
+
+# We need to register the BB-Promster in a different etcd base then the one informed by the user
+# If we don't do this, PRSN will get overritten and we loose that information
+export REGISTRY_ETCD_BASE="${REGISTRY_ETCD_BASE}-promster-l${BB_PROMSTER_LEVEL}"
 
 sh /startup.sh # inherited from flaviostutz/promster

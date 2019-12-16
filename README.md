@@ -5,10 +5,10 @@ This project defines custom [Promster](https://github.com/flaviostutz/promster) 
 The currently supported metrics are:
 
 ```
-request_seconds_bucket{type,status, method, addr, le}
-request_seconds_count{type, status, method, addr}
-request_seconds_sum{type, status, method, addr}
-response_size_bytes{type, status, method, addr}
+request_seconds_bucket{type,status, method, addr, isError, version, le}
+request_seconds_count{type, status, method, addr, isError, version}
+request_seconds_sum{type, status, method, addr, isError, version}
+response_size_bytes{type, status, method, addr, isError, version}
 dependency_up{name}
 ```
 
@@ -53,7 +53,9 @@ The BB Promster docker image expects at least four different configurations:
 
 3. **REGISTRY_ETCD_BASE**: defines in which base path of the ETCD is grouped all the components to observe a specific application;
 
-4. **SCRAPE_ETCD_PATH**: this information tells level 1 BB-Promsters where to find the targets IP addresses at the provided ETCD installation. **Important: Mandatory only for level 1 BB-Promsters**;
+4. **REGISTRY_SERVICE**: defines the name of the service you are observing as defined at the appropriate ETCD record;
+
+5. **SCRAPE_ETCD_PATH**: this information tells level 1 BB-Promsters where to find the targets IP addresses at the provided ETCD installation. **Important: Mandatory only for level 1 BB-Promsters**;
 
 ## Multiple ETCDs
 If you have a scenario where you have different ETCD clusters, one for registering Scraping instances and other for registering Promster instances, you can leave `ETCD_URLS` empty and define the following ENVs:
@@ -84,12 +86,11 @@ This will lauch 4 services:
 
 1. an etcd registry;
 
-2. a node js express service instrumented with our `express-monitor` lib that gets it's IPs registered to the `/services/example` ETCD path;
+2. two metrics generator services with IPs registered at the `/metrics-generator/` ETCD path;
 
-3. a level 1 bb-promster instance that will scrape the exposed metrics at the service's `/metrics` endpoint;
+3. two a level 1 bb-promster instances that will scrape the exposed metrics at the services' `/metrics` endpoint;
 
-4. a level 2 bb-promster instance that will federate the level 1 bb-promster instances;
-
+4. two level 2 bb-promster instances that will federate the right level 1 bb-promster instances;
 
 With this setup you can exercise some scenarios, such as:
 
