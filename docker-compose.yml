@@ -91,27 +91,14 @@ services:
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
 
-  bb-promster-1-grafana:
+  bb-promster-grafana:
     image: labbsr0x/bb-promster:latest
     depends_on:
       - bb-promster-1-l2
     ports:
       - 9090
     environment:
-      - REGISTRY_SERVICE=example-1
-      - REGISTRY_ETCD_BASE=/metrics-generator
-      - BB_PROMSTER_LEVEL=3
-      - ETCD_URLS=http://etcd:2379
-      - CLEAR_RR=true
-
-  bb-promster-2-grafana:
-    image: labbsr0x/bb-promster:latest
-    depends_on:
-      - bb-promster-2-l2
-    ports:
-      - 9090
-    environment:
-      - REGISTRY_SERVICE=example-2
+      - REGISTRY_SERVICE=example
       - REGISTRY_ETCD_BASE=/metrics-generator
       - BB_PROMSTER_LEVEL=3
       - ETCD_URLS=http://etcd:2379
