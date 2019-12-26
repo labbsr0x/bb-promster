@@ -2,7 +2,7 @@
 
 This project defines custom [Promster](https://github.com/flaviostutz/promster) images to work with specific metrics defined by the [Big Brother](https://github.com/labbsr0x/big-brother) project.
 
-The currently supported metrics are:
+The out of the box supported metrics are:
 
 ```
 request_seconds_bucket{type,status, method, addr, isError, version, le}
@@ -12,9 +12,11 @@ response_size_bytes{type, status, method, addr, isError, version}
 dependency_up{name}
 ```
 
-These metrics can be easily generated with **Big Brother's** monitor libraries. Please check them out at the the main project.
+These metrics can be easily generated with **Big Brother's** monitor libraries. Please check them out at the the [main project](https://github.com/labbsr0x/big-brother).
 
 # How it works
+
+![how it workds](https://raw.githubusercontent.com/labbsr0x/bb-promster/assets/how-it-works.png "how it works")
 
 [Promster](https://github.com/flaviostutz/promster) is a powerfull tool to automatically identify new service instancies to scrape. 
 
@@ -26,11 +28,11 @@ The Big Brother Promster, or just BB Promster, comes to solve this issue by aggr
 
 The BB Promster should be used in the context of the Big Brother project, where it is assumed that your service:
 
-1. publishes your metrics at a `/metrics` endpoint;
+1. publishes your metrics at a metrics endpoint;
 
-2. have all the metrics listed above exposed;
+2. have all the big-brother metrics listed above exposed;
 
-3. with the help of our [etcd-registrar](https://github.com/flaviostutz/etcd-registrar) or [etcd-registry](https://github.com/flaviostutz/etcd-registry), registers itself at an etcd cluster for automatic scraping ;
+3. with the help of our [etcd-registrar](https://github.com/flaviostutz/etcd-registrar) or [etcd-registry](https://github.com/flaviostutz/etcd-registry), registers itself at an etcd cluster for automatic scraping;
 
 # Federation
 
