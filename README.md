@@ -16,8 +16,6 @@ These metrics can be easily generated with **Big Brother's** monitor libraries. 
 
 # How it works
 
-![how it workds](https://raw.githubusercontent.com/labbsr0x/bb-promster/assets/how-it-works.png "how it works")
-
 [Promster](https://github.com/flaviostutz/promster) is a powerfull tool to automatically identify new service instancies to scrape. 
 
 It is highly configurable and one can do with it pretty much everything that can be accomplished with Prometheus.
@@ -33,6 +31,8 @@ The BB Promster should be used in the context of the Big Brother project, where 
 2. have all the big-brother metrics listed above exposed;
 
 3. with the help of our [etcd-registrar](https://github.com/flaviostutz/etcd-registrar) or [etcd-registry](https://github.com/flaviostutz/etcd-registry), registers itself at an etcd cluster for automatic scraping;
+
+![how it works](https://raw.githubusercontent.com/labbsr0x/bb-promster/assets/how-it-works.png "how it works")
 
 # Federation
 
