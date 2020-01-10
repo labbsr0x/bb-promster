@@ -1,4 +1,5 @@
 # Big Brother Promster
+[![Docker Pulls](https://img.shields.io/docker/pulls/labbsr0x/bb-promster.svg)](https://hub.docker.com/r/labbsr0x/bb-promster)
 
 This project defines custom [Promster](https://github.com/flaviostutz/promster) images to work with specific metrics defined by the [Big Brother](https://github.com/labbsr0x/big-brother) project.
 
