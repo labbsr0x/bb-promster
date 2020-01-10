@@ -12,6 +12,7 @@ ENV RETENTION_TIME 2h
 
 ADD run.sh /
 ADD rules /etc/prometheus/
+ADD alert_rules /etc/prometheus
 ADD prometheus.yml.tmpl /
 
 RUN chmod 777 /run.sh

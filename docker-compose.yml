@@ -103,4 +103,10 @@ services:
       - BB_PROMSTER_LEVEL=3
       - ETCD_URLS=http://etcd:2379
       - CLEAR_RR=true
-
+  
+  alert-manager:
+    image: labbsr0x/bb-promster-alertmanager
+    build:
+      ./alert_manager
+    ports:
+      - 9093
