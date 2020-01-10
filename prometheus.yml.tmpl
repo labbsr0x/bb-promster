@@ -7,6 +7,14 @@ rule_files:
   - /rules.yml
   - /etc/prometheus/rules-l1.yml
   - /etc/prometheus/rules-ln.yml
+  - /etc/prometheus/alert_rules-ln.yml
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "alert-manager:9093"
 
 scrape_configs:
   - job_name: 'prometheus'
