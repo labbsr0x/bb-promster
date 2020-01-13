@@ -11,10 +11,9 @@ rule_files:
 
 alerting:
   alertmanagers:
-  - scheme: http
+  - scheme: {{.scheme}}
     static_configs:
-    - targets:
-      - "alert-manager:9093"
+    - targets: ['$ALERT_MANAGER_URLS']
 
 scrape_configs:
   - job_name: 'prometheus'

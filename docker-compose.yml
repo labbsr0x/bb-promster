@@ -46,6 +46,7 @@ services:
       - BB_PROMSTER_LEVEL=1
       - ETCD_URLS=http://etcd:2379
       - SCRAPE_ETCD_PATH=/metrics-generator/example-1 # based on how the examples are configured ($REGISTRY_ETCD_BASE/$REGISTRY_SERVICE)
+      - ALERT_MANAGER_URLS=alertmanager:9093
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
@@ -61,6 +62,7 @@ services:
       - REGISTRY_ETCD_BASE=/metrics-generator
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
+      - ALERT_MANAGER_URLS=alertmanager:9093
 
   bb-promster-2-l1:
     build: .
@@ -78,6 +80,7 @@ services:
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
+      - ALERT_MANAGER_URLS=alertmanager:9093
 
   bb-promster-2-l2:
     image: labbsr0x/bb-promster:latest
@@ -90,6 +93,7 @@ services:
       - REGISTRY_ETCD_BASE=/metrics-generator
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
+      - ALERT_MANAGER_URLS=alertmanager:9093
 
   bb-promster-grafana:
     image: labbsr0x/bb-promster:latest
@@ -104,9 +108,7 @@ services:
       - ETCD_URLS=http://etcd:2379
       - CLEAR_RR=true
   
-  alert-manager:
+  alertmanager:
     image: labbsr0x/bb-promster-alertmanager
-    build:
-      ./alert_manager
     ports:
-      - 9093
+      - 9093:9093
