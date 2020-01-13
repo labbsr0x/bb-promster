@@ -1,1 +1,0 @@
-FROM prom/alertmanager:v0.19.0

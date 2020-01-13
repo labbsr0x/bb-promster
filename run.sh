@@ -73,4 +73,5 @@ if [[ "$CLEAR_RR" = "true" ]]; then
     rm /etc/prometheus/rules-ln.yml
 fi
 
+sed -i -e 's/$ALERT_MANAGER_URLS/'"${ALERT_MANAGER_URLS}"'/g' "/prometheus.yml.tmpl"
 sh /startup.sh # inherited from flaviostutz/promster
