@@ -7,7 +7,7 @@ rule_files:
   - /rules.yml
   - /etc/prometheus/rules-l1.yml
   - /etc/prometheus/rules-ln.yml
-  - /etc/prometheus/alert_rules-ln.yml
+  - /etc/prometheus/$ALERT_RULES_FILE
 
 alerting:
   alertmanagers:

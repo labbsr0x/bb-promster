@@ -109,6 +109,6 @@ services:
       - CLEAR_RR=true
   
   alertmanager:
-    image: labbsr0x/bb-promster-alertmanager
+    image: prom/alertmanager
     ports:
       - 9093:9093

@@ -7,6 +7,7 @@ ENV SCRAPE_TIMEOUT ""
 ENV REGISTRY_SERVICE ""
 ENV CLEAR_RR ""
 ENV ALERT_MANAGER_URLS ""
+ENV ALERT_RULES_FILE ""
 
 ENV REGISTRY_TTL 15
 ENV RETENTION_TIME 2h
@@ -18,4 +19,4 @@ ADD prometheus.yml.tmpl /
 
 RUN chmod 777 /run.sh
 
-CMD ["-C", "/run.sh"]
+CMD ["-C", "/run.sh"]   
