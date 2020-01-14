@@ -73,7 +73,8 @@ if [[ "$CLEAR_RR" = "true" ]]; then
     rm /etc/prometheus/rules-ln.yml
 fi
 
-export ALERT_RULES_FILE="alert_rules-l${BB_PROMSTER_LEVEL}.yml"
+ALERT_RULES_FILE="alert_rules-l${BB_PROMSTER_LEVEL}.yml"
+
 sed -i -e 's/$ALERT_RULES_FILE/'"${ALERT_RULES_FILE}"'/g' "/prometheus.yml.tmpl"
 sed -i -e 's/$ALERT_MANAGER_URLS/'"${ALERT_MANAGER_URLS}"'/g' "/prometheus.yml.tmpl"
 
