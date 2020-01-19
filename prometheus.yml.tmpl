@@ -9,6 +9,9 @@ rule_files:
   - /etc/prometheus/rules-ln.yml
   - /etc/prometheus/$ALERT_RULES_FILE
 
+remote_write:
+  - url: $REMOTE_WRITE_URL
+
 alerting:
   alertmanagers:
   - scheme: {{.scheme}}

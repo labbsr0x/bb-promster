@@ -1,0 +1,72 @@
+version: '3.5'
+
+services:
+
+  # A valid/configured cassandra instance must be running on your host.
+  # your can run it by executing:
+  #   docker run -d --name cassandra --rm -p 9042:9042 cassandra:3.11
+  # and then configuring the cortex KEYSPACE by first entering a CQLSH session:
+  #   docker exec -it <cassandra container_id> cqlsh
+  # and executing:
+  #   CREATE KEYSPACE cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+  # after that you can just:
+  #   docker-compose -f docker-compose.cortex.yam up -d
+
+  cortex:
+    image: quay.io/cortexproject/cortex
+    ports:
+      - 9009:9009
+    volumes:
+      - ./single-process-config.yaml:/etc/single-process-config.yaml
+    command: -config.file=/etc/single-process-config.yaml
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.2.25
+    ports:
+      - 2379:2379
+    environment:
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+
+  example-1:
+    image: abilioesteves/metrics-generator
+    depends_on:
+        - etcd
+    ports:
+        - 32865
+    environment:
+        - REGISTRY_ETCD_URL=http://etcd:2379
+        - REGISTRY_SERVICE=example-1
+        - REGISTRY_ETCD_BASE=/metrics-generator
+
+  # consider example-2 to be a completely different application from example-1
+  example-2:
+    image: abilioesteves/metrics-generator
+    depends_on: 
+        - etcd
+    ports:
+        - 32865
+    environment:
+        - REGISTRY_ETCD_URL=http://etcd:2379
+        - REGISTRY_SERVICE=example-2
+        - REGISTRY_ETCD_BASE=/metrics-generator
+
+  bb-promster-l1:
+    build: .
+    image: labbsr0x/bb-promster:latest
+    depends_on: 
+      - example-1
+      - example-2
+    ports:
+      - 9090:9090
+    environment:
+      - REGISTRY_SERVICE=example
+      - REGISTRY_ETCD_BASE=/metrics-generator
+      - BB_PROMSTER_LEVEL=1
+      - ETCD_URLS=http://etcd:2379
+      - SCRAPE_ETCD_PATH=/metrics-generator/example # based on how the examples are configured ($REGISTRY_ETCD_BASE/$REGISTRY_SERVICE)
+      - CLEAR_RR=true
+      - REMOTE_WRITE_URL=http://cortex:9009/api/prom/push
+      # - TLS_INSECURE=true
+      # - SCRAPE_PATHS=/your-custom-metrics-path
+      # - SCHEME="https"
