@@ -73,6 +73,9 @@ if [[ "$CLEAR_RR" == "true" ]]; then
     rm /etc/prometheus/rules-ln.yml
 fi
 
+
+sed -i -e 's;$REMOTE_WRITE_URL;'"${REMOTE_WRITE_URL}"';g' "/prometheus.yml.tmpl";
+
 # the user can configure an alertmanager to manage alerts only on level 1 of the federation
 if [[ "$ALERT_MANAGER_URLS" != "" -a "$BB_PROMSTER_LEVEL" == "1" ]]; then
     sed -i -e 's;$ALERT_RULES_FILE;'"- /etc/prometheus/alert-rules.yml"';g' "/prometheus.yml.tmpl"
@@ -87,6 +90,15 @@ alerting:
 EOM
 else
     sed -i -e 's/$ALERT_RULES_FILE/'""'/g' "/prometheus.yml.tmpl"
+fi
+
+# the user can also configure a remote url to send prometheus metrics to 
+if [[ "$REMOTE_WRITE_URL" != "" ]]; then
+    cat >> "/prometheus.yml.tmpl" <<- EOM
+
+remote_write:
+  - url: $REMOTE_WRITE_URL
+EOM
 fi
 
 sh /startup.sh # inherited from flaviostutz/promster
