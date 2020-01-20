@@ -103,5 +103,34 @@ With this setup you can exercise some scenarios, such as:
 
 2. scaling up level 1 bb-promster;
 
+# Cortex
+
+A cortex example was added to the `cortex` folder as a proof-of-concept.
+
+To experiment with it, you need to have a valid/configured cassandra instance running on your host. You can run it by executing:
+
+```bash
+docker run -d --name cassandra --rm -p 9042:9042 cassandra:3.11
+```
+
+Configure your cortex cassandra `KEYSPACE` by first entering a valid `CQLSH` session with `docker exec -it <cassandra container_id> cqlsh` and then executing:
+
+```sql
+CREATE KEYSPACE cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+```
+
+After successfully configuring your cassandra, you can just `docker-compose up -d` from the `cortex` folder.
+ 
+The cortex startup time can be really slow due to ingestor ring syncronization routines, so you should wait a bit (a minute or two).
+
+Go to your web browser at `http://localhost:3000`, add the Prometheus Cortex datasource (`http://cortex:9009/api/prom`) and import our Big Brother grafana dashboard with ID `11544`.
+
+You should see something like the following:
+
+![Health Overview](https://raw.githubusercontent.com/labbsr0x/bb-grafana/assets/screenshot.jpg "Health Overview")
+
+# Big Brother
+
+This is part of a more large application called [Big Brother](https://github.com/labbsr0x/big-brother).
 
 

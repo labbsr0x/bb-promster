@@ -3,7 +3,7 @@ version: '3.5'
 services:
 
   # A valid/configured cassandra instance must be running on your host.
-  # your can run it by executing:
+  # you can run it by executing:
   #   docker run -d --name cassandra --rm -p 9042:9042 cassandra:3.11
   # and then configuring the cortex KEYSPACE by first entering a CQLSH session:
   #   docker exec -it <cassandra container_id> cqlsh
