@@ -14,7 +14,7 @@ services:
   # wait a while, the cortex startup time can be really slow.
 
   cortex:
-    image: quay.io/cortexproject/cortex
+    image: quay.io/cortexproject/cortex:v0.4.0
     ports:
       - 9009:9009
     volumes:
@@ -53,7 +53,7 @@ services:
         - REGISTRY_ETCD_BASE=/metrics-generator
 
   bb-promster-l1:
-    build: .
+    build: ../
     image: labbsr0x/bb-promster:latest
     depends_on: 
       - example-1
