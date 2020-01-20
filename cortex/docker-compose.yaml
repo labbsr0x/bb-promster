@@ -10,7 +10,8 @@ services:
   # and executing:
   #   CREATE KEYSPACE cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
   # after that you can just:
-  #   docker-compose -f docker-compose.cortex.yaml up -d
+  #   docker-compose up -d
+  # wait a while, the cortex startup time can be really slow.
 
   cortex:
     image: quay.io/cortexproject/cortex
@@ -65,8 +66,12 @@ services:
       - BB_PROMSTER_LEVEL=1
       - ETCD_URLS=http://etcd:2379
       - SCRAPE_ETCD_PATH=/metrics-generator/example # based on how the examples are configured ($REGISTRY_ETCD_BASE/$REGISTRY_SERVICE)
-      - CLEAR_RR=true
       - REMOTE_WRITE_URL=http://cortex:9009/api/prom/push
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
