@@ -10,7 +10,7 @@ services:
   # and executing:
   #   CREATE KEYSPACE cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
   # after that you can just:
-  #   docker-compose -f docker-compose.cortex.yam up -d
+  #   docker-compose -f docker-compose.cortex.yaml up -d
 
   cortex:
     image: quay.io/cortexproject/cortex
