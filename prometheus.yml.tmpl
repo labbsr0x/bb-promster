@@ -7,16 +7,7 @@ rule_files:
   - /rules.yml
   - /etc/prometheus/rules-l1.yml
   - /etc/prometheus/rules-ln.yml
-  - /etc/prometheus/$ALERT_RULES_FILE
-
-remote_write:
-  - url: $REMOTE_WRITE_URL
-
-alerting:
-  alertmanagers:
-  - scheme: {{.scheme}}
-    static_configs:
-    - targets: ['$ALERT_MANAGER_URLS']
+  $ALERT_RULES_FILE
 
 scrape_configs:
   - job_name: 'prometheus'

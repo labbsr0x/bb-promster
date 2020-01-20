@@ -17,17 +17,17 @@ These metrics can be easily generated with **Big Brother's** monitor libraries. 
 
 # How it works
 
-[Promster](https://github.com/flaviostutz/promster) is a powerfull tool to automatically identify new service instancies to scrape. 
+BB Promster is an extension to Flavio Stutz's [Promster](https://github.com/flaviostutz/promster), a powerfull tool to automatically identify new service instances to scrape.
 
-It is highly configurable and one can do with it pretty much everything that can be accomplished with Prometheus.
+It is highly configurable and one can do with it pretty much anything that can be accomplished with [Prometheus](https://github.com/prometheus/prometheus).
 
-But the knowledge gap is a bit too steep for a developer with no observability training to start using it properly.
+On the other side, the knowledge gap is a bit too steep for a professional with no observability training to start using Promster properly.
 
 The Big Brother Promster, or just BB Promster, comes to solve this issue by aggregating in one place the needed semantics to correctly monitor your application.
 
 The BB Promster should be used in the context of the Big Brother project, where it is assumed that your service:
 
-1. publishes your metrics at a metrics endpoint;
+1. publishes your metrics at a `/metrics` endpoint;
 
 2. have all the big-brother metrics listed above exposed;
 
@@ -41,9 +41,7 @@ The BB Promster also leverages the federation features implemented by Promster (
 
 Prometheus federation is the concept of clustering prometheus instances to allow the handling of huge metric loads. 
 
-Ultimately, it ends up in a tree layout with a top-layer, any number of middle layers, and a end layer of prometheus hitting your `/metrics` endpoint directly.
-
-In the context of the Big Brother Project, this top-layer will also be federated by Big Brother, meaning that the `/federate` endpoint needs to be exposed to the public internet.
+Ultimately, it ends up in a tree layout with a top-layer, any number of middle layers, and an end layer of prometheus hitting your `/metrics` endpoint directly.
 
 # Configuration
 
@@ -76,6 +74,8 @@ If you have a scenario where you have different ETCD clusters, one for registeri
 3. **SCRAPE_PATHS**: if your metrics path does not follow the default `/metrics`, you'll need to configure this variable to point to the exact path where your metrics are exposed;
 
 4. **CLEAR_RR**: the recording rules can be all removed if you wish. Just set the `CLEAR_RR` env to `true` and `bb-promster` will have it's set of recording rules deleted; 
+
+5. **ALERT_MANAGER_URLS**: if you have a configured alertmanager at your disposal, you can set BB Promster to leverage it by using the provided `ALERT_MANAGER_URLS` environment variable. Only Level 1 BB Promster will have the alerting rules installed and the alert manager urls properly configured. This is to disable redundant alerting;
 
 All other configurations from [Promster](https://github.com/flaviostutz/promster) itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
 

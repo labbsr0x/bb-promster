@@ -7,27 +7,27 @@ if [[ "$ETCD_URLS" != "" ]]; then
     export SCRAPE_ETCD_URL=$ETCD_URLS
 fi
 
-if [[ "$REGISTRY_ETCD_URL" = "" ]]; then
+if [[ "$REGISTRY_ETCD_URL" == "" ]]; then
     echo "REGISTRY_ETCD_URL must NOT be empty" 1>&2
     exit 1
 fi
 
-if [[ "$SCRAPE_ETCD_URL" = "" ]]; then
+if [[ "$SCRAPE_ETCD_URL" == "" ]]; then
     echo "SCRAPE_ETCD_URL must NOT be empty" 1>&2
     exit 2
 fi
 
-if [[ "$REGISTRY_ETCD_BASE" = "" ]]; then
+if [[ "$REGISTRY_ETCD_BASE" == "" ]]; then
     echo "REGISTRY_ETCD_BASE must NOT be empty" 1>&2
     exit 3
 fi
 
-if [[ "$REGISTRY_SERVICE" = "" ]]; then
+if [[ "$REGISTRY_SERVICE" == "" ]]; then
     echo "REGISTRY_SERVICE must NOT be empty" 1>&2
     exit 3
 fi
 
-if [[ "$BB_PROMSTER_LEVEL" = "" ]]; then
+if [[ "$BB_PROMSTER_LEVEL" == "" ]]; then
     echo "BB_PROMSTER_LEVEL must NOT be empty" 1>&2
     exit 4
 fi
@@ -43,51 +43,62 @@ if [[ $ll -ne 0 ]]; then # if true, we properly configure bb-promster to behave 
     export SCRAPE_ETCD_PATH="${REGISTRY_ETCD_BASE}-promster-${SCRAPE_MATCH_REGEX}/${REGISTRY_SERVICE}" # configure where to look for federation targets
     export SCRAPE_PATHS="/federate" # path to federate
 else
-    if [[ "$SCRAPE_ETCD_PATH" = "" ]]; then 
+    if [[ "$SCRAPE_ETCD_PATH" == "" ]]; then 
         echo "SCRAPE_ETCD_PATH cannot be empty for a Level 1 BB-PROMSTER instance" 1>&2
         exit 6
     fi
-    if [[ "$SCRAPE_PATHS" = "" ]]; then 
+    if [[ "$SCRAPE_PATHS" == "" ]]; then 
         # defaults to /metrics when not set by user
         export SCRAPE_PATHS="/metrics"
     fi
 fi
 
-if [[ "$SCRAPE_INTERVAL" = "" ]]; then
+if [[ "$SCRAPE_INTERVAL" == "" ]]; then
     export SCRAPE_INTERVAL="$((BB_PROMSTER_LEVEL * 30))s"
 fi
 
-if [[ "$SCRAPE_TIMEOUT" = "" ]]; then
+if [[ "$SCRAPE_TIMEOUT" == "" ]]; then
     export SCRAPE_TIMEOUT="$((BB_PROMSTER_LEVEL * 15))s"
 fi
 
 sed -i -e 's/$BB_PROMSTER_LEVEL/'"l${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/rules-ln.yml"
 
 # We need to register the BB-Promster in a different etcd base then the one informed by the user
-# If we don't do this, PRSN will get overritten and we loose that information
+# If we don't do this, PRSN will get overwritten in a federation and we'll loose that information
 export REGISTRY_ETCD_BASE="${REGISTRY_ETCD_BASE}-promster-l${BB_PROMSTER_LEVEL}"
 
-# the user has a option to clear the recording rules if desired
-if [[ "$CLEAR_RR" = "true" ]]; then 
+# with the CLEAR_RR env, the user has the option to clear the recording rules
+if [[ "$CLEAR_RR" == "true" ]]; then 
     rm /etc/prometheus/rules-l1.yml
     rm /etc/prometheus/rules-ln.yml
 fi
 
-ALERT_RULES_FILE="alert_rules-l${BB_PROMSTER_LEVEL}.yml";
-sed -i -e 's/$ALERT_RULES_FILE/'"${ALERT_RULES_FILE}"'/g' "/prometheus.yml.tmpl";
-sed -i -e 's/$ALERT_MANAGER_URLS/'"${ALERT_MANAGER_URLS}"'/g' "/prometheus.yml.tmpl";
+
 sed -i -e 's;$REMOTE_WRITE_URL;'"${REMOTE_WRITE_URL}"';g' "/prometheus.yml.tmpl";
 
-# configure remote write
-if [[ "$REMOTE_WRITE_URL" = ""]]; then
-    # sed -i -e 's/$REMOTE_WRITE/'""'/g' "/prometheus.yml.tmpl";
-    echo "REMOTE WRITE IS EMPTY"
+# the user can configure an alertmanager to manage alerts only on level 1 of the federation
+if [[ "$ALERT_MANAGER_URLS" != "" -a "$BB_PROMSTER_LEVEL" == "1" ]]; then
+    sed -i -e 's;$ALERT_RULES_FILE;'"- /etc/prometheus/alert-rules.yml"';g' "/prometheus.yml.tmpl"
+
+    cat >> "/prometheus.yml.tmpl" <<- EOM
+
+alerting:
+  alertmanagers:
+  - scheme: {{.scheme}}
+    static_configs:
+    - targets: ['$ALERT_MANAGER_URLS']
+EOM
 else
-#     REMOTE_WRITE="
-# remote_write:
-#   - url: $REMOTE_WRITE_URL"
-#     sed -i -e 's/$REMOTE_WRITE/'"${REMOTE_WRITE}"'/g' "/prometheus.yml.tmpl"
-    echo "REMOTE WRITE IS NOT EMPTY"
+    sed -i -e 's/$ALERT_RULES_FILE/'""'/g' "/prometheus.yml.tmpl"
+fi
+
+# the user can also configure a remote url to send prometheus metrics to 
+if [[ "$REMOTE_WRITE_URL" != "" ]]; then
+    cat >> "/prometheus.yml.tmpl" <<- EOM
+
+remote_write:
+  - url: $REMOTE_WRITE_URL
+EOM
 fi
 
 sh /startup.sh # inherited from flaviostutz/promster

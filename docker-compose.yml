@@ -38,6 +38,7 @@ services:
     image: labbsr0x/bb-promster:latest
     depends_on: 
       - example-1
+      - alertmanager
     ports:
       - 9090
     environment:
@@ -93,7 +94,6 @@ services:
       - REGISTRY_ETCD_BASE=/metrics-generator
       - BB_PROMSTER_LEVEL=2
       - ETCD_URLS=http://etcd:2379
-      - ALERT_MANAGER_URLS=alertmanager:9093
 
   bb-promster-grafana:
     image: labbsr0x/bb-promster:latest
@@ -102,7 +102,7 @@ services:
     ports:
       - 9090
     environment:
-      - REGISTRY_SERVICE=example
+      - REGISTRY_SERVICE=example # it federates via prefixes. bb-promster-grafana will then collect both metrics from bb-promster-1-l2 and bb-promster-2-l2.
       - REGISTRY_ETCD_BASE=/metrics-generator
       - BB_PROMSTER_LEVEL=3
       - ETCD_URLS=http://etcd:2379
