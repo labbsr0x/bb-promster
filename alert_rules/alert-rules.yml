@@ -5,5 +5,6 @@ groups:
     expr: dependency_up < 1
     for: 2m
     annotations:
+      app: "{{ $labels.prsn }}"
       description: A dependência {{$labels.name}} do serviço {{$labels.prsn}} não está respondendo.
       summary: Alerta para caso uma dependência passe mais de 2 minutos sem resposta
