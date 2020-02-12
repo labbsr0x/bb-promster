@@ -6,11 +6,12 @@ This project defines custom [Promster](https://github.com/flaviostutz/promster) 
 The out of the box supported metrics are:
 
 ```
-request_seconds_bucket{type,status, method, addr, isError, version, le}
-request_seconds_count{type, status, method, addr, isError, version}
-request_seconds_sum{type, status, method, addr, isError, version}
-response_size_bytes{type, status, method, addr, isError, version}
+request_seconds_bucket{type, status, isError, method, addr, le}
+request_seconds_count{type, status, isError, method, addr}
+request_seconds_sum{type, status, isError, method, addr}
+response_size_bytes{type, status, isError, method, addr}
 dependency_up{name}
+application_info{version}
 ```
 
 These metrics can be easily generated with **Big Brother's** monitor libraries. Please check them out at the the [main project](https://github.com/labbsr0x/big-brother).
