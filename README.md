@@ -114,7 +114,7 @@ To experiment with it, you need to have a valid/configured cassandra instance ru
 docker run -d --name cassandra --rm -p 9042:9042 cassandra:3.11
 ```
 
-Configure your cortex cassandra `KEYSPACE` by first entering a valid `CQLSH` session with `docker exec -it <cassandra container_id> cqlsh` and then executing:
+Wait a bit for Cassandra to normalize (usually `30s`). After that, configure your cortex cassandra `KEYSPACE` by first entering a valid `CQLSH` session with `docker exec -it cassandra cqlsh` and then executing:
 
 ```sql
 CREATE KEYSPACE cortex WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
@@ -122,9 +122,17 @@ CREATE KEYSPACE cortex WITH replication = {'class':'SimpleStrategy', 'replicatio
 
 After successfully configuring your cassandra, you can just `docker-compose up -d` from the `cortex` folder.
  
-The cortex startup time can be really slow due to ingestor ring syncronization routines, so you should wait a bit (a minute or two).
+The cortex startup time can be really slow due to Ingester ring synchronization routines, so you should wait a bit (from 2 minutes up until 10).
 
-Go to your web browser at `http://localhost:3000`, add the Prometheus Cortex datasource (`http://cortex:9009/api/prom`) and import our Big Brother grafana dashboard with ID `11544`.
+You will know cortex is up and running when hitting `http://localhost:9001/ring` at your browser lists the available Ingesters.
+
+You can also check your cortex logs for the following message:
+
+```log
+level=info ts=2020-02-19T12:51:33.3486187Z caller=main.go:100 msg="Starting Cortex" version="(version=, branch=, revision=)"
+``` 
+
+After everything is up and running, go to your web browser at `http://localhost:3000`, add the Prometheus Cortex datasource (`http://cortex1:9009/api/prom`) and import our Big Brother grafana dashboard with ID `11544`.
 
 You should see something like the following:
 
