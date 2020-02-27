@@ -99,6 +99,14 @@ if [[ "$REMOTE_WRITE_URL" != "" ]]; then
 remote_write:
   - url: $REMOTE_WRITE_URL
 EOM
+    if [[ "$REMOTE_WRITE_BEARER_TOKEN" != "" ]]; then
+        cat >> "/prometheus.yml.tmpl" <<- EOM
+
+    bearer_token: $REMOTE_WRITE_BEARER_TOKEN
+EOM
+    fi
 fi
+
+
 
 sh /startup.sh # inherited from flaviostutz/promster

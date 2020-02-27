@@ -78,6 +78,10 @@ If you have a scenario where you have different ETCD clusters, one for registeri
 
 5. **ALERT_MANAGER_URLS**: if you have a configured alertmanager at your disposal, you can set BB Promster to leverage it by using the provided `ALERT_MANAGER_URLS` environment variable. Only Level 1 BB Promster will have the alerting rules installed and the alert manager urls properly configured. This is to disable redundant alerting;
 
+6. **REMOTE_WRITE_URL**: The URL of the endpoint to send samples to. It adds remote_write section to prometheus.yml config.
+
+7. **REMOTE_WRITE_BEARER_TOKEN**: Adding a bearer token to all remote write requests. 
+
 All other configurations from [Promster](https://github.com/flaviostutz/promster) itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
 
 # Example
