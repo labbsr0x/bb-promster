@@ -62,6 +62,6 @@ schema:
 
 storage:
   cassandra:
-    addresses: host.docker.internal
+    addresses: cassandra
     keyspace: cortex
 

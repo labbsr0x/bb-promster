@@ -13,10 +13,20 @@ services:
   #   docker-compose up -d
   # wait a while, the cortex startup time can be really slow.
 
+  cassandra:
+    container_name: cassandra
+    image: labbsr0x/cassandra:latest
+    build: 
+      context: cassandra/
+    ports: 
+      - 9042:9042
+
   cortex1:
+    container_name: cortex1
     image: quay.io/cortexproject/cortex:v0.6.0
     depends_on:
       - consul
+      - cassandra
     ports:
       - 9001:9009
     volumes:
@@ -25,9 +35,11 @@ services:
     restart: on-failure
 
   cortex2:
+    container_name: cortex2
     image: quay.io/cortexproject/cortex:v0.6.0
     depends_on:
       - consul
+      - cassandra
     ports:
       - 9002:9009
     volumes:
@@ -36,9 +48,11 @@ services:
     restart: on-failure
 
   cortex3:
+    container_name: cortex3
     image: quay.io/cortexproject/cortex:v0.6.0
     depends_on:
       - consul
+      - cassandra
     ports:
       - 9003:9009
     volumes:
@@ -99,10 +113,10 @@ services:
       - ETCD_URLS=http://etcd:2379
       - SCRAPE_ETCD_PATH=/metrics-generator/example # based on how the examples are configured ($REGISTRY_ETCD_BASE/$REGISTRY_SERVICE)
       - REMOTE_WRITE_URL=http://cortex1:9009/api/prom/push
+      # - REMOTE_WRITE_BASIC_AUTH=user1:teste1
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
-
   grafana:
     image: grafana/grafana:latest
     ports:
