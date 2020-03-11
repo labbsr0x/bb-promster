@@ -37,6 +37,7 @@ if [[ $((BB_PROMSTER_LEVEL)) -lt 1 ]]; then
     exit 5
 fi
 
+
 ll=$((BB_PROMSTER_LEVEL - 1))
 if [[ $ll -ne 0 ]]; then # if true, we properly configure bb-promster to behave like a level-n promster
     export SCRAPE_MATCH_REGEX="l$ll" # configure federation to look for (BB_PROMSTER_LVEL - 1) metrics
@@ -61,6 +62,11 @@ if [[ "$SCRAPE_TIMEOUT" == "" ]]; then
     export SCRAPE_TIMEOUT="$((BB_PROMSTER_LEVEL * 15))s"
 fi
 
+if [[ "$ALERT_MANAGER_SCHEME" == "" ]]; then
+    export ALERT_MANAGER_SCHEME="https"
+fi
+
+
 sed -i -e 's/$BB_PROMSTER_LEVEL/'"l${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/rules-ln.yml"
 
 # We need to register the BB-Promster in a different etcd base then the one informed by the user
@@ -84,7 +90,7 @@ if [[ "$ALERT_MANAGER_URLS" != "" -a "$BB_PROMSTER_LEVEL" == "1" ]]; then
 
 alerting:
   alertmanagers:
-  - scheme: {{.scheme}}
+  - scheme: $ALERT_MANAGER_SCHEME
     static_configs:
     - targets: ['$ALERT_MANAGER_URLS']
 EOM
