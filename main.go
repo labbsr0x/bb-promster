@@ -15,11 +15,18 @@ type Version struct{
 }
 
 func main() {
-	fmt.Print("Container up\n")
+	// templating 
 	versions := Version{"v0002", "v0001"}
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
 	if err != nil { panic(err) }
-	err = tmpl.Execute(os.Stdout, versions)
+
+	// file creating
+	f, err := os.Create("/etc/prometheus/comparative-alerts.yml")
+	if err != nil {
+		fmt.Println("create file: ", err)
+		return
+	}
+	err = tmpl.Execute(f, versions)
 	if err != nil { panic(err) }
 
 	cli, err := clientv3.New(clientv3.Config{
@@ -33,8 +40,4 @@ func main() {
 	}
 
 	defer cli.Close()
-
-	for {
-
-	}
 }
