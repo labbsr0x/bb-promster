@@ -1,0 +1,11 @@
+groups:
+- name: ComparativeAlerts
+  rules:
+    - alert: NewerVersionHas10PercentMoreErrorsThanPreviousVersion
+      expr: rate(http_requests_app_total{status=~"4..", device_app_version="{{.PilotVersion}}"}[5m])  /  ignoring(device_app_version) rate(http_requests_app_total{status=~"4..", device_app_version="{{.ProdVersion}}"}[5m])
+      for: 3m
+      labels:
+        severity: page
+      annotations:
+        description: Version {{.PilotVersion}} has more than 10 percent erros than version {{.ProdVersion}}
+        summary: Newer Version Has 10 Percent More Errors Than Previous Version
