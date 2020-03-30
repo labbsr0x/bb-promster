@@ -66,7 +66,6 @@ if [[ "$ALERT_MANAGER_SCHEME" == "" ]]; then
     export ALERT_MANAGER_SCHEME="https"
 fi
 
-
 sed -i -e 's/$BB_PROMSTER_LEVEL/'"l${BB_PROMSTER_LEVEL}"'/g' "/etc/prometheus/rules-ln.yml"
 
 # We need to register the BB-Promster in a different etcd base then the one informed by the user
@@ -83,8 +82,12 @@ fi
 sed -i -e 's;$REMOTE_WRITE_URL;'"${REMOTE_WRITE_URL}"';g' "/prometheus.yml.tmpl";
 
 # the user can configure an alertmanager to manage alerts only on level 1 of the federation
+if [[ "$ALERT_RULES_FILE" == "" ]]; then
+    export ALERT_RULES_FILE="/etc/prometheus/alert-rules.yml"
+fi
+
 if [[ "$ALERT_MANAGER_URLS" != "" -a "$BB_PROMSTER_LEVEL" == "1" ]]; then
-    sed -i -e 's;$ALERT_RULES_FILE;'"- /etc/prometheus/alert-rules.yml"';g' "/prometheus.yml.tmpl"
+    sed -i -e 's;$ALERT_RULES_FILE;'"- $ALERT_RULES_FILE"';g' "/prometheus.yml.tmpl"
 
     cat >> "/prometheus.yml.tmpl" <<- EOM
 

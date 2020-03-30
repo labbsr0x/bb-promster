@@ -48,6 +48,7 @@ services:
       - ETCD_URLS=http://etcd:2379
       - SCRAPE_ETCD_PATH=/metrics-generator/example-1 # based on how the examples are configured ($REGISTRY_ETCD_BASE/$REGISTRY_SERVICE)
       - ALERT_MANAGER_URLS=alertmanager:9093
+      - ALERT_RULES_FILE=/etc/prometheus/comparative-alerts.yml
       # - TLS_INSECURE=true
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
