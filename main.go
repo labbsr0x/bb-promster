@@ -29,12 +29,20 @@ func main() {
 	err = tmpl.Execute(f, versions)
 	if err != nil { panic(err) }
 
+	//etcd writing
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"http://etcd:2379"},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil { panic(err)}
-	_, err = cli.Put(context.TODO(), "foo", "bar")
+	_, err = cli.Put(context.TODO(), "/pilot_version/v0002", "")
+	if err != nil {
+    	fmt.Print(err)
+	}
+
+	value, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
+	fmt.Print(value)
+
 	if err != nil {
     	fmt.Print(err)
 	}
