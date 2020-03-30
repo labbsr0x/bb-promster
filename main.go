@@ -7,6 +7,7 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"time"
 	"context"
+	"path"
 )
 
 type Version struct{
@@ -15,19 +16,9 @@ type Version struct{
 }
 
 func main() {
-	// templating 
-	versions := Version{"v0002", "v0001"}
-	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
-	if err != nil { panic(err) }
+	
 
-	// file creating
-	f, err := os.Create("/etc/prometheus/comparative-alerts.yml")
-	if err != nil {
-		fmt.Println("create file: ", err)
-		return
-	}
-	err = tmpl.Execute(f, versions)
-	if err != nil { panic(err) }
+	
 
 	//etcd writing
 	cli, err := clientv3.New(clientv3.Config{
@@ -40,12 +31,35 @@ func main() {
     	fmt.Print(err)
 	}
 
-	value, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
-	fmt.Print(value)
+	_, err = cli.Put(context.TODO(), "/prod_version/v0001", "")
+	if err != nil {
+    	fmt.Print(err)
+	}
+
+	kv, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
+	pilot_version := path.Base(string(kv.Kvs[0].Key))
+
+	kv2, err := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
+	prod_version := path.Base(string(kv2.Kvs[0].Key))
+
 
 	if err != nil {
     	fmt.Print(err)
 	}
+
+	// templating 
+	versions := Version{pilot_version, prod_version}
+	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
+	if err != nil { panic(err) }
+
+	// file creating
+	f, err := os.Create("/etc/prometheus/comparative-alerts.yml")
+	if err != nil {
+		fmt.Println("create file: ", err)
+		return
+	}
+	err = tmpl.Execute(f, versions)
+	if err != nil { panic(err) }
 
 	defer cli.Close()
 }
