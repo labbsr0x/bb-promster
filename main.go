@@ -4,8 +4,8 @@ import (
 	"text/template"
 	"fmt"
 	"os"
-	"go.etcd.io/etcd/clientv3"
 	"time"
+	"go.etcd.io/etcd/clientv3"
 	"context"
 	"path"
 )
@@ -23,7 +23,9 @@ func main() {
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil { panic(err)}
-	_, err = cli.Put(context.TODO(), "/pilot_version/v0002", "")
+
+	
+	_, err = cli.Put(context.TODO(), "/pilot_version/v0003", "")
 	if err != nil {
     	fmt.Print(err)
 	}
@@ -32,7 +34,8 @@ func main() {
 	if err != nil {
     	fmt.Print(err)
 	}
-
+	
+	
 	//getting data from etcd
 	kv, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
 	pilot_version := path.Base(string(kv.Kvs[0].Key))
@@ -40,19 +43,23 @@ func main() {
 	kv2, err := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
 	prod_version := path.Base(string(kv2.Kvs[0].Key))
 
-
-	generateAlertFile(pilot_version, prod_version)
+	
+	
 	
 	if err != nil {
     	fmt.Print(err)
 	}
 
-	
-
 	defer cli.Close()
+	
+	versionsChan := make(chan []string, 0)
+	go watchUpdatedVersions("/prod_version", cli, versionsChan)
+	generateAlertFile(pilot_version, prod_version)
+	fmt.Print(versionsChan)
 }
 
 func generateAlertFile(pilot_version string, prod_version string) {
+	fmt.Print("Generate file")
 	// templating 
 	versions := Version{pilot_version, prod_version}
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
@@ -66,4 +73,15 @@ func generateAlertFile(pilot_version string, prod_version string) {
 	}
 	err = tmpl.Execute(f, versions)
 	if err != nil { panic(err) }
+}
+
+//it works, but isn't being called by go thread
+func watchUpdatedVersions(version string, cli *clientv3.Client, versionsChan chan []string){
+	fmt.Print("function called")
+	rch := cli.Watch(context.Background(), version)
+	for wresp := range rch {
+    	for _, ev := range wresp.Events {
+        	fmt.Printf("%s %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
+    	}
+	}
 }
