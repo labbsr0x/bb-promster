@@ -17,9 +17,6 @@ type Version struct{
 
 func main() {
 	
-
-	
-
 	//etcd writing
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"http://etcd:2379"},
@@ -36,6 +33,7 @@ func main() {
     	fmt.Print(err)
 	}
 
+	//getting data from etcd
 	kv, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
 	pilot_version := path.Base(string(kv.Kvs[0].Key))
 
@@ -43,10 +41,18 @@ func main() {
 	prod_version := path.Base(string(kv2.Kvs[0].Key))
 
 
+	generateAlertFile(pilot_version, prod_version)
+	
 	if err != nil {
     	fmt.Print(err)
 	}
 
+	
+
+	defer cli.Close()
+}
+
+func generateAlertFile(pilot_version string, prod_version string) {
 	// templating 
 	versions := Version{pilot_version, prod_version}
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
@@ -60,6 +66,4 @@ func main() {
 	}
 	err = tmpl.Execute(f, versions)
 	if err != nil { panic(err) }
-
-	defer cli.Close()
 }
