@@ -34,7 +34,10 @@ func main() {
     	fmt.Print(err)
 	}
 	
-	
+	//starting version struct
+	versions := Version {
+	}
+
 	//getting data from etcd
 	kv, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
 	pilot_version := path.Base(string(kv.Kvs[0].Key))
@@ -52,7 +55,7 @@ func main() {
 	
 	generateAlertFile(pilot_version, prod_version)
 	
-	go watchUpdatedVersions("/prod_version", cli)
+	go versions.watchUpdatedVersions(cli)
 	
 	select{}
 	
@@ -102,22 +105,24 @@ func watchUpdatedVersionsDeprecated(version string, cli *clientv3.Client, versio
 	//} 
 }
 
-func watchUpdatedVersions(version string, cli *clientv3.Client) {
+func (v Version) watchUpdatedVersions(cli *clientv3.Client) {
 	for {
-		rsp, err0 := cli.Get(context.TODO(), version, clientv3.WithPrefix())
+		rspProd, err0 := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
+		rspPilot, err0 := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
 		
 		if err0 != nil {
 			fmt.Print(err0)
 		}
 		
-		if len(rsp.Kvs) == 0 {
-			fmt.Printf("no %s versions founded\n", version)
-		} else {	
-			arraySize := len(rsp.Kvs)
-			prodPath := string(rsp.Kvs[arraySize-1].Key)
-			prodVersion := path.Base(prodPath)
-			fmt.Println("Prod version", prodVersion)
-			
+		if len(rspProd.Kvs) == 0 || len(rspPilot.Kvs) == 0{
+			fmt.Println("Pilot or Prod version not found")
+		} else {
+			prodPath := string(rspProd.Kvs[len(rspProd.Kvs)-1].Key)
+			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
+			v.ProdVersion = path.Base(prodPath)
+			v.PilotVersion = path.Base(pilotPath)
+			fmt.Println("Prod version", v.ProdVersion)
+			fmt.Println("Pilot version", v.PilotVersion)
 			
 			//versionsChan <- prod_version
 		}
