@@ -110,5 +110,5 @@ remote_write:
 EOM
 fi
 
+sh /startup.sh & # inherited from flaviostutz/promster 
 /bin/main
-sh /startup.sh # inherited from flaviostutz/promster
