@@ -38,22 +38,9 @@ func main() {
 	versions := Version {
 	}
 
-	//getting data from etcd
-	kv, err := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
-	pilot_version := path.Base(string(kv.Kvs[0].Key))
-
-	kv2, err := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
-	prod_version := path.Base(string(kv2.Kvs[0].Key))
-
-	if err != nil {
-    	fmt.Print(err)
-	}
-	
-
 	defer cli.Close()
 
 	versionsChan := make(chan Version)
-	generateAlertFile(pilot_version, prod_version)
 	
 	go versions.watchUpdatedVersions(cli, versionsChan)
 	
@@ -61,15 +48,16 @@ func main() {
 		select{
 		case versions := <-versionsChan:
 			fmt.Println(versions)
+			generateAlertFile(versions)
 		}
 	}
 	
 }
 
-func generateAlertFile(pilot_version string, prod_version string) {
+func generateAlertFile(v Version) {
 	fmt.Println("Generate file")
 	// templating 
-	versions := Version{pilot_version, prod_version}
+	//versions := Version{pilot_version, prod_version}
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
 	if err != nil { panic(err) }
 
@@ -79,12 +67,13 @@ func generateAlertFile(pilot_version string, prod_version string) {
 		fmt.Println("create file: ", err)
 		return
 	}
-	err = tmpl.Execute(f, versions)
+	err = tmpl.Execute(f, v)
 	if err != nil { panic(err) }
 }
 
 func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Version) {
-	//fmt.Println("Version chan", <-versionsChan)
+	watchChan := cli.Watch(context.TODO(), "/prod_version", clientv3.WithPrefix())
+	
 	for {
 		rspProd, err0 := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
 		rspPilot, err0 := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
@@ -100,13 +89,9 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
 			v.ProdVersion = path.Base(prodPath)
 			v.PilotVersion = path.Base(pilotPath)
-			fmt.Println("Prod version", v.ProdVersion)
-			fmt.Println("Pilot version", v.PilotVersion)
-			versionsChan <- v
-			
+			versionsChan <- v	
 		}
-		
-		//fmt.Println("Version chan", <-versionsChan)
-		time.Sleep(5 * time.Second)
+		<- watchChan
+		time.Sleep(time.Second)
 	}
 }
