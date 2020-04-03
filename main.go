@@ -52,13 +52,17 @@ func main() {
 
 	defer cli.Close()
 
-	
+	versionsChan := make(chan Version)
 	generateAlertFile(pilot_version, prod_version)
 	
-	go versions.watchUpdatedVersions(cli)
+	go versions.watchUpdatedVersions(cli, versionsChan)
 	
-	select{}
-	
+	for {
+		select{
+		case versions := <-versionsChan:
+			fmt.Println(versions)
+		}
+	}
 	
 }
 
@@ -79,33 +83,8 @@ func generateAlertFile(pilot_version string, prod_version string) {
 	if err != nil { panic(err) }
 }
 
-func forever() {
-    for {
-        fmt.Printf("%v+\n", time.Now())
-        time.Sleep(time.Second)
-    }
-}
-
-//it works, but isn't being called by go thread
-func watchUpdatedVersionsDeprecated(version string, cli *clientv3.Client, versionsChan chan string){
-	//for {
-		fmt.Print("function called")
-		rch := cli.Watch(context.Background(), version)
-		var prod_version string
-		for wresp := range rch {
-			fmt.Print(wresp)
-			for _, ev := range wresp.Events {
-				prod_version = string(ev.Kv.Key)
-				fmt.Printf("%s %q : %q\n", ev.Type, ev.Kv.Key, ev.Kv.Value)
-			}
-			versionsChan <- prod_version
-			
-		}
-		//time.Sleep(time.Second)
-	//} 
-}
-
-func (v Version) watchUpdatedVersions(cli *clientv3.Client) {
+func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Version) {
+	//fmt.Println("Version chan", <-versionsChan)
 	for {
 		rspProd, err0 := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
 		rspPilot, err0 := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
@@ -123,10 +102,11 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client) {
 			v.PilotVersion = path.Base(pilotPath)
 			fmt.Println("Prod version", v.ProdVersion)
 			fmt.Println("Pilot version", v.PilotVersion)
+			versionsChan <- v
 			
-			//versionsChan <- prod_version
 		}
 		
-		time.Sleep(60 * time.Second)
+		//fmt.Println("Version chan", <-versionsChan)
+		time.Sleep(5 * time.Second)
 	}
 }
