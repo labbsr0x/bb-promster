@@ -11,7 +11,7 @@ services:
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
 
   example-1:
-    image: labbsr0x/metrics-generator-tabajara
+    image: abilioesteves/metrics-generator
     depends_on:
       - etcd
     ports:
@@ -23,7 +23,7 @@ services:
 
   # consider example-2 to be a completely different application from example-1
   example-2:
-    image: labbsr0x/metrics-generator-tabajara
+    image: abilioesteves/metrics-generator
     depends_on: 
       - etcd
     ports:
