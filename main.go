@@ -4,6 +4,7 @@ import (
 	"text/template"
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
 	"go.etcd.io/etcd/clientv3"
 	"context"
@@ -17,6 +18,7 @@ type Version struct{
 
 func main() {
 	//etcd writing
+	
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"http://etcd:2379"},
 		DialTimeout: 5 * time.Second,
@@ -24,7 +26,7 @@ func main() {
 	if err != nil { panic(err)}
 
 	
-	_, err = cli.Put(context.TODO(), "/pilot_version/v0003", "")
+	_, err = cli.Put(context.TODO(), "/pilot_version/v0002", "")
 	if err != nil {
     	fmt.Print(err)
 	}
@@ -49,15 +51,15 @@ func main() {
 		case versions := <-versionsChan:
 			fmt.Println(versions)
 			generateAlertFile(versions)
+			updatePrometheus()
 		}
 	}
 	
 }
 
 func generateAlertFile(v Version) {
-	fmt.Println("Generate file")
+	fmt.Println("Generate alert file")
 	// templating 
-	//versions := Version{pilot_version, prod_version}
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
 	if err != nil { panic(err) }
 
@@ -89,9 +91,22 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
 			v.ProdVersion = path.Base(prodPath)
 			v.PilotVersion = path.Base(pilotPath)
+			
+			
 			versionsChan <- v	
 		}
 		<- watchChan
 		time.Sleep(time.Second)
+	}
+}
+
+func updatePrometheus() {
+	fmt.Println("Updating prometheus alert files")
+	cmd := exec.Command("wget", "--post-data=''", "http://localhost:9090/-/reload", "-O", "-")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
 	}
 }

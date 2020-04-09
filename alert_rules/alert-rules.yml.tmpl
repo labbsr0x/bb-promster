@@ -2,7 +2,9 @@ groups:
 - name: ComparativeAlerts
   rules:
     - alert: NewerVersionHas10PercentMoreErrorsThanPreviousVersion
-      expr: rate(http_requests_app_total{status=~"4..", device_app_version="{{.PilotVersion}}"}[5m])  /  ignoring(device_app_version) rate(http_requests_app_total{status=~"4..", device_app_version="{{.ProdVersion}}"}[5m])
+      expr: (rate(http_requests_app_total{device_app_version="{{.PilotVersion}}",status=~"4.."}[5m]) 
+        - ignoring (device_app_version) rate(http_requests_app_total{device_app_version="{{.ProdVersion}}",status=~"4.."}[5m]))
+        / ignoring (device_app_version) rate(http_requests_app_total{device_app_version="{{.ProdVersion}}",status=~"4.."}[5m]) > 0.1      
       for: 3m
       labels:
         severity: page
