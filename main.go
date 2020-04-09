@@ -9,6 +9,7 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"context"
 	"path"
+	"github.com/sirupsen/logrus"
 )
 
 type Version struct{
@@ -58,7 +59,7 @@ func main() {
 }
 
 func generateAlertFile(v Version) {
-	fmt.Println("Generate alert file")
+	logrus.Info("Generate alert file")
 	// templating 
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
 	if err != nil { panic(err) }
@@ -85,7 +86,7 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 		}
 		
 		if len(rspProd.Kvs) == 0 || len(rspPilot.Kvs) == 0{
-			fmt.Println("Pilot or Prod version not found")
+			logrus.Warn("Pilot or Prod version not found")
 		} else {
 			prodPath := string(rspProd.Kvs[len(rspProd.Kvs)-1].Key)
 			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
@@ -101,10 +102,8 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 }
 
 func updatePrometheus() {
-	fmt.Println("Updating prometheus alert files")
+	logrus.Info("Updating prometheus alert files")
 	cmd := exec.Command("wget", "--post-data=''", "http://localhost:9090/-/reload", "-O", "-")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	if err != nil {
 		fmt.Println(err)
