@@ -24,18 +24,24 @@ func main() {
 		Endpoints:   []string{"http://etcd:2379"},
 		DialTimeout: 5 * time.Second,
 	})
-	if err != nil { panic(err)}
+	if err != nil { 
+		logrus.Fatal("Could not connect to etcd")
+		panic(err)
+	}
 
 	
-	_, err = cli.Put(context.TODO(), "/pilot_version/v0002", "")
+	_, err = cli.Put(context.TODO(), "/versions/example-1/pilot_version/v0002", "")
 	if err != nil {
-    	fmt.Print(err)
+    	panic(err)
 	}
 
-	_, err = cli.Put(context.TODO(), "/prod_version/v0001", "")
+	_, err = cli.Put(context.TODO(), "/versions/example-1/prod_version/v0001", "")
 	if err != nil {
-    	fmt.Print(err)
+    	panic(err)
 	}
+
+	//testing string
+	getEnvironment()
 	
 	//starting version struct
 	versions := Version {
@@ -50,7 +56,6 @@ func main() {
 	for {
 		select{
 		case versions := <-versionsChan:
-			fmt.Println(versions)
 			generateAlertFile(versions)
 			updatePrometheus()
 		}
@@ -62,27 +67,31 @@ func generateAlertFile(v Version) {
 	logrus.Info("Generate alert file")
 	// templating 
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
-	if err != nil { panic(err) }
+	if err != nil { 
+		panic(err) 
+	}
 
 	// file creating
 	f, err := os.Create("/etc/prometheus/comparative-alerts.yml")
 	if err != nil {
-		fmt.Println("create file: ", err)
-		return
+		panic(err)
+		
 	}
 	err = tmpl.Execute(f, v)
-	if err != nil { panic(err) }
+	if err != nil { 
+		panic(err) 
+	}
 }
 
 func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Version) {
-	watchChan := cli.Watch(context.TODO(), "/prod_version", clientv3.WithPrefix())
+	watchChan := cli.Watch(context.TODO(), "/versions", clientv3.WithPrefix())
 	
 	for {
-		rspProd, err0 := cli.Get(context.TODO(), "/prod_version", clientv3.WithPrefix())
-		rspPilot, err0 := cli.Get(context.TODO(), "/pilot_version", clientv3.WithPrefix())
+		rspProd, err := cli.Get(context.TODO(), "/versions/"+ os.Getenv("REGISTRY_SERVICE") + "/prod_version", clientv3.WithPrefix())
+		rspPilot, err := cli.Get(context.TODO(), "/versions/"+ os.Getenv("REGISTRY_SERVICE") + "/pilot_version", clientv3.WithPrefix())
 		
-		if err0 != nil {
-			fmt.Print(err0)
+		if err != nil {
+			panic(err) 
 		}
 		
 		if len(rspProd.Kvs) == 0 || len(rspPilot.Kvs) == 0{
@@ -91,9 +100,7 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 			prodPath := string(rspProd.Kvs[len(rspProd.Kvs)-1].Key)
 			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
 			v.ProdVersion = path.Base(prodPath)
-			v.PilotVersion = path.Base(pilotPath)
-			
-			
+			v.PilotVersion = path.Base(pilotPath)	
 			versionsChan <- v	
 		}
 		<- watchChan
@@ -108,4 +115,10 @@ func updatePrometheus() {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func getEnvironment() {
+	fmt.Println("------------------!!!!!!!!!!!!!--------------")
+	fmt.Println(os.Getenv("REGISTRY_SERVICE"))
+	fmt.Println("------------------!!!!!!!!!!!!!--------------")
 }
