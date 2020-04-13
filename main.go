@@ -2,7 +2,6 @@ package main
 
 import (
 	"text/template"
-	"fmt"
 	"os"
 	"os/exec"
 	"time"
@@ -18,7 +17,6 @@ type Version struct{
 }
 
 func main() {
-	//etcd writing
 	
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"http://etcd:2379"},
@@ -29,12 +27,9 @@ func main() {
 		panic(err)
 	}
 	
-	//starting version struct
-	versions := Version {
-	}
-
 	defer cli.Close()
 
+	var versions Version 
 	versionsChan := make(chan Version)
 	
 	go versions.watchUpdatedVersions(cli, versionsChan)
@@ -51,13 +46,12 @@ func main() {
 
 func generateAlertFile(v Version) {
 	logrus.Info("Generate alert file")
-	// templating 
+	
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
 	if err != nil { 
 		panic(err) 
 	}
 
-	// file creating
 	f, err := os.Create("/etc/prometheus/comparative-alerts.yml")
 	if err != nil {
 		panic(err)
@@ -89,7 +83,6 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 			versionsChan <- v	
 		}
 		<- watchChan
-		time.Sleep(time.Second)
 	}
 }
 
@@ -98,6 +91,6 @@ func updatePrometheus() {
 	cmd := exec.Command("wget", "--post-data=''", "http://localhost:9090/-/reload", "-O", "-")
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 }
