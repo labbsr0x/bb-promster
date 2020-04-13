@@ -28,20 +28,6 @@ func main() {
 		logrus.Fatal("Could not connect to etcd")
 		panic(err)
 	}
-
-	
-	_, err = cli.Put(context.TODO(), "/versions/example-1/pilot_version/v0002", "")
-	if err != nil {
-    	panic(err)
-	}
-
-	_, err = cli.Put(context.TODO(), "/versions/example-1/prod_version/v0001", "")
-	if err != nil {
-    	panic(err)
-	}
-
-	//testing string
-	getEnvironment()
 	
 	//starting version struct
 	versions := Version {
@@ -89,7 +75,6 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 	for {
 		rspProd, err := cli.Get(context.TODO(), "/versions/"+ os.Getenv("REGISTRY_SERVICE") + "/prod_version", clientv3.WithPrefix())
 		rspPilot, err := cli.Get(context.TODO(), "/versions/"+ os.Getenv("REGISTRY_SERVICE") + "/pilot_version", clientv3.WithPrefix())
-		
 		if err != nil {
 			panic(err) 
 		}
@@ -115,10 +100,4 @@ func updatePrometheus() {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-func getEnvironment() {
-	fmt.Println("------------------!!!!!!!!!!!!!--------------")
-	fmt.Println(os.Getenv("REGISTRY_SERVICE"))
-	fmt.Println("------------------!!!!!!!!!!!!!--------------")
 }
