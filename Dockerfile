@@ -7,7 +7,6 @@ RUN apk update
 RUN apk add git
 RUN go get go.etcd.io/etcd/clientv3
 RUN go get github.com/sirupsen/logrus
-RUN go get github.com/spf13/cobra/cobra
 RUN go get github.com/spf13/viper
 RUN go build -o main .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .

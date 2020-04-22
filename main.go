@@ -8,50 +8,17 @@ import (
 	"go.etcd.io/etcd/clientv3"
 	"context"
 	"path"
-	"fmt"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-var rootCmd = &cobra.Command{
-	Use: "bb-promster",
-	Short: "A promster image definition to properly work with the Big Brother project",
-}
 
 type Version struct{
 	PilotVersion string
 	ProdVersion string
 }
 
-func execute() {
-	if err := rootCmd.Execute(); err != nil {
-		logrus.Error(err)
-		os.Exit(1)
-	}
-}
-func init() {
-	cobra.OnInitialize(initConfig)
-	fmt.Println("Func called")
-	viper.AutomaticEnv()
-	fmt.Println("Testing around", viper.GetString("ETCD_URLS"))
-}
-
-func initConfig(){
-	fmt.Println("FUNC CALLED")
-	viper.SetEnvPrefix("REGISTRY_SERVICE")
-	viper.AutomaticEnv()
-	viper.AddRemoteProvider("etcd", "http://etcd:2379", "")
-	viper.SetConfigType("json") // because there is no file extension in a stream of bytes, supported extensions are "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"
-	err := viper.ReadRemoteConfig()
-	if err != nil {
-		logrus.Error(err)
-	}
-	
-}
-
 func main() {
-	execute()
+	viper.AutomaticEnv()
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{viper.GetString("ETCD_URLS")},
 		DialTimeout: 5 * time.Second,
