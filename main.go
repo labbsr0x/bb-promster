@@ -53,7 +53,7 @@ func initConfig(){
 func main() {
 	execute()
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"http://etcd:2379"},
+		Endpoints:   []string{viper.GetString("ETCD_URLS")},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil { 
@@ -101,8 +101,8 @@ func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Ve
 	watchChan := cli.Watch(context.TODO(), "/versions", clientv3.WithPrefix())
 	
 	for {
-		rspProd, err := cli.Get(context.TODO(), "/versions/"+ os.Getenv("REGISTRY_SERVICE") + "/prod_version", clientv3.WithPrefix())
-		rspPilot, err := cli.Get(context.TODO(), "/versions/"+ os.Getenv("REGISTRY_SERVICE") + "/pilot_version", clientv3.WithPrefix())
+		rspProd, err := cli.Get(context.TODO(), "/versions/"+ viper.GetString("REGISTRY_SERVICE") + "/prod_version", clientv3.WithPrefix())
+		rspPilot, err := cli.Get(context.TODO(), "/versions/"+ viper.GetString("REGISTRY_SERVICE") + "/pilot_version", clientv3.WithPrefix())
 		if err != nil {
 			panic(err) 
 		}
