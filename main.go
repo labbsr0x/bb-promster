@@ -9,11 +9,33 @@ import (
 	"context"
 	"path"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var rootCmd = &cobra.Command{
+	Use: "bb-promster",
+	Short: "A promster image definition to properly work with the Big Brother project",
+}
 
 type Version struct{
 	PilotVersion string
 	ProdVersion string
+}
+
+func Execute() {
+	if err := rootCmd.Execute(); err != nil {
+		logrus.Error(err)
+		os.Exit(1)
+	}
+}
+func init() {
+	cobra.OnInitialize(initConfig)
+}
+
+func initConfig(){
+	viper.SetEnvPrefix("REGISTRY_SERVICE")
+	viper.AutomaticEnv()
 }
 
 func main() {
