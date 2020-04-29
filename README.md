@@ -80,6 +80,21 @@ If you have a scenario where you have different ETCD clusters, one for registeri
 
 All other configurations from [Promster](https://github.com/flaviostutz/promster) itself and Prometheus are still available for use. We recommend, though, to use them with care and always checking for conflicts with our env resolution logic implemented in `run.sh`.
 
+# Alert Rules Template Loader
+The BB-promster allows you to update alert-rules templates based on `prod_version` and `pilot_version` registered on etcd. It's useful to easily create and update comparative alerts between versions. To use this functionality, you need to: 
+
+1. Define the env **ALERT_RULES_FILE** equals to `/etc/prometheus/comparative-alerts.yml` in your `docker-compose.yml` file.
+
+2. Create an `alert-rules.yml.tmpl` inside the `alert_rules` folder. The valid variables for the template are `.PilotVersion` and `.ProdVersion`. You can find an alert template file example [here](https://github.com/labbsr0x/bb-promster/blob/master/alert_rules/alert-rules.yml.tmpl).
+
+3. Run bb-promster project.
+
+4. Register `prod_version` in etcd, passing `/versions/$REGISTRY_SERVICE/prod_version/version_number`. For example: `etcdctl put /versions/example-1/prod_version/v0001`.
+
+5. Register the `pilot_version` in etcd, passing `/versions/$REGISTRY_SERVICE/pilot_version/version_number`. For example: `etcdctl put /versions/example-1/pilot_version/v0002`.
+
+Once a prod_version and a pilot_version are registered in etcd, the template file will be loaded in Prometheus as an alert rules file. When a new version was registered in etcd, the alert rule will be reloaded with the new version. 
+
 # Example
 
 This repository also comes with an example. Just go to your terminal and type:
