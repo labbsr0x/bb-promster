@@ -78,15 +78,13 @@ if [[ "$CLEAR_RR" == "true" ]]; then
     rm /etc/prometheus/rules-ln.yml
 fi
 
-
 sed -i -e 's;$REMOTE_WRITE_URL;'"${REMOTE_WRITE_URL}"';g' "/prometheus.yml.tmpl";
 
-# the user can configure an alertmanager to manage alerts only on level 1 of the federation
 if [[ "$ALERT_RULES_FILE" == "" ]]; then
     export ALERT_RULES_FILE="/etc/prometheus/alert-rules.yml"
 fi
 
-if [[ "$ALERT_MANAGER_URLS" != "" -a "$BB_PROMSTER_LEVEL" == "1" ]]; then
+if [[ "$ALERT_MANAGER_URLS" != "" ]]; then
     sed -i -e 's;$ALERT_RULES_FILE;'"- $ALERT_RULES_FILE"';g' "/prometheus.yml.tmpl"
 
     cat >> "/prometheus.yml.tmpl" <<- EOM

@@ -85,6 +85,7 @@ services:
       # - SCRAPE_PATHS=/your-custom-metrics-path
       # - SCHEME="https"
       - ALERT_MANAGER_URLS=alertmanager:9093
+      - ALERT_MANAGER_SCHEME=http
 
   bb-promster-2-l2:
     image: labbsr0x/bb-promster:latest
