@@ -1,13 +1,68 @@
 groups:
 - name: ComparativeAlerts
   rules:
+    - record: request_duration_seconds_error:sum_irate
+      expr: sum(irate(request_seconds_count{status!="2xx"}[2m])) by (addr, prsn, instance)
+
+    - record: request_duration_seconds_total:sum_irate
+      expr: sum(irate(request_seconds_count[2m])) by (addr, prsn, instance)
+
+    - record: request_duration_seconds_error_rate
+      expr: request_duration_seconds_error:sum_irate / request_duration_seconds_total:sum_irate
+
+    - record: request_duration_seconds_sum:sum_irate
+      expr: sum(irate(request_seconds_sum[2m])) by (addr, prsn, instance) 
+      
+    - record: request_duration_seconds_latency
+      expr: request_duration_seconds_sum:sum_irate / request_duration_seconds_total:sum_irate
+
+    - record: request_duration_seconds_error_comparative
+      expr: ((request_duration_seconds_error_rate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.PilotVersion}}"})) 
+        - ignoring(instance) (request_duration_seconds_error_rate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) ) ) 
+        / ignoring(instance) (request_duration_seconds_error_rate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) )
+    
+    - record: request_duration_seconds_sum_comparative
+      expr: ((request_duration_seconds_sum:sum_irate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.PilotVersion}}"})) 
+        - ignoring(instance) (request_duration_seconds_sum:sum_irate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) ) ) 
+        / ignoring(instance) (request_duration_seconds_sum:sum_irate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) )
+
+    - record: request_duration_seconds_latency_comparative
+      expr: ((request_duration_seconds_latency and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.PilotVersion}}"})) 
+        - ignoring(instance) (request_duration_seconds_latency and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) ) ) 
+        / ignoring(instance) (request_duration_seconds_latency and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) )
+    
     - alert: NewerVersionHas10PercentMoreErrorsThanPreviousVersion
-      expr: (rate(http_requests_app_total{device_app_version="{{.PilotVersion}}",status=~"4.."}[5m]) 
-        - ignoring (device_app_version) rate(http_requests_app_total{device_app_version="{{.ProdVersion}}",status=~"4.."}[5m]))
-        / ignoring (device_app_version) rate(http_requests_app_total{device_app_version="{{.ProdVersion}}",status=~"4.."}[5m]) > 0.1      
-      for: 3m
+      expr: request_duration_seconds_error_comparative > 0.1      
+      for: 4m
       labels:
         severity: page
       annotations:
-        description: Version {{.PilotVersion}} has more than 10 percent erros than version {{.ProdVersion}}
+        description: URL in version {{.PilotVersion}} has 10 percent more erros than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More Errors Than Previous Version
+
+    - alert: NewerVersionHas10PercentMoreTrafficThanPreviousVersion
+      expr: request_duration_seconds_sum_comparative > 0.1 
+      for: 4m
+      labels:
+        severity: page
+      annotations:
+        description: URL in version {{.PilotVersion}} has 10 percent more traffic than version {{.ProdVersion}}
+        summary: Newer Version Has 10 Percent More traffic Than Previous Version
+    
+    - alert: NewerVersionHas10PercentLessTrafficThanPreviousVersion
+      expr: request_duration_seconds_sum_comparative < -0.1 
+      for: 4m
+      labels:
+        severity: page
+      annotations:
+        description: URL in version {{.PilotVersion}} has 10 percent less traffic than version {{.ProdVersion}}
+        summary: Newer Version Has 10 Percent Less Traffic Than Previous Version
+
+    - alert: NewerVersionHas10PercentMoreLatencyThanPreviusVersion
+      expr: request_duration_seconds_latency_comparative > 0.1
+      for: 4m
+      labels:
+        severity: page
+      annotations:
+        description: URL in version {{.PilotVersion}} has 10 percent more latency than version {{.ProdVersion}}
+        summary: Newer Version Has 10 Percent More Latency Than Previous Version
