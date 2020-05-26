@@ -37,9 +37,10 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL in version {{.PilotVersion}} has 10 percent more erros than version {{.ProdVersion}}
+        description: URL {{`$labels.addr`}} in version {{.PilotVersion}} has 10 percent more erros than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More Errors Than Previous Version
         app: {{.Prsn}}
+        url: {{`$labels.addr`}}
 
     - alert: NewerVersionHas10PercentMoreTrafficThanPreviousVersion
       expr: request_duration_seconds_sum_comparative > 0.1 
@@ -47,9 +48,10 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL in version {{.PilotVersion}} has 10 percent more traffic than version {{.ProdVersion}}
+        description: URL {{`$labels.addr`}} in version {{.PilotVersion}} has 10 percent more traffic than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More traffic Than Previous Version
         app: {{.Prsn}}
+        url: {{`$labels.addr`}}
 
     - alert: NewerVersionHas10PercentLessTrafficThanPreviousVersion
       expr: request_duration_seconds_sum_comparative < -0.1 
@@ -57,9 +59,10 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL in version {{.PilotVersion}} has 10 percent less traffic than version {{.ProdVersion}}
+        description: URL {{`$labels.addr`}} in version {{.PilotVersion}} has 10 percent less traffic than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent Less Traffic Than Previous Version
         app: {{.Prsn}}
+        url: {{`$labels.addr`}}
 
     - alert: NewerVersionHas10PercentMoreLatencyThanPreviusVersion
       expr: request_duration_seconds_latency_comparative > 0.1
@@ -67,7 +70,7 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL in version {{.PilotVersion}} has 10 percent more latency than version {{.ProdVersion}}
+        description: URL {{`$labels.addr`}} in version {{.PilotVersion}} has 10 percent more latency than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More Latency Than Previous Version
         app: {{.Prsn}}
-        
+        url: {{`$labels.addr`}}
