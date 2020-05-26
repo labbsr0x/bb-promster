@@ -1,20 +1,22 @@
 package main
 
 import (
-	"text/template"
+	"context"
 	"os"
 	"os/exec"
-	"time"
-	"go.etcd.io/etcd/clientv3"
-	"context"
 	"path"
+	"text/template"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"go.etcd.io/etcd/clientv3"
 )
 
-type Version struct{
+type Label struct {
 	PilotVersion string
-	ProdVersion string
+	ProdVersion  string
+	Prsn         string
 }
 
 func main() {
@@ -23,67 +25,68 @@ func main() {
 		Endpoints:   []string{viper.GetString("ETCD_URLS")},
 		DialTimeout: 5 * time.Second,
 	})
-	if err != nil { 
+	if err != nil {
 		logrus.Fatal("Could not connect to etcd")
 		panic(err)
 	}
-	
+
 	defer cli.Close()
 
-	var versions Version 
-	versionsChan := make(chan Version)
-	
-	go versions.watchUpdatedVersions(cli, versionsChan)
-	
+	var labels Label
+	labelsChan := make(chan Label)
+
+	go labels.watchUpdatedVersions(cli, labelsChan)
+
 	for {
-		select{
-		case versions := <-versionsChan:
+		select {
+		case versions := <-labelsChan:
 			generateAlertFile(versions)
 			updatePrometheus()
 		}
 	}
-	
+
 }
 
-func generateAlertFile(v Version) {
+func generateAlertFile(v Label) {
 	logrus.Info("Generate alert file")
-	
+
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
-	if err != nil { 
-		panic(err) 
+	if err != nil {
+		panic(err)
 	}
 
 	f, err := os.Create("/etc/prometheus/comparative-alerts.yml")
 	if err != nil {
 		panic(err)
-		
+
 	}
 	err = tmpl.Execute(f, v)
-	if err != nil { 
-		panic(err) 
+	if err != nil {
+		panic(err)
 	}
 }
 
-func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Version) {
+func (v Label) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Label) {
 	watchChan := cli.Watch(context.TODO(), "/versions", clientv3.WithPrefix())
-	
+
 	for {
-		rspProd, err := cli.Get(context.TODO(), "/versions/"+ viper.GetString("REGISTRY_SERVICE") + "/prod_version", clientv3.WithPrefix())
-		rspPilot, err := cli.Get(context.TODO(), "/versions/"+ viper.GetString("REGISTRY_SERVICE") + "/pilot_version", clientv3.WithPrefix())
+		rspProd, err := cli.Get(context.TODO(), "/versions/"+viper.GetString("REGISTRY_SERVICE")+"/prod_version", clientv3.WithPrefix())
+		rspPilot, err := cli.Get(context.TODO(), "/versions/"+viper.GetString("REGISTRY_SERVICE")+"/pilot_version", clientv3.WithPrefix())
 		if err != nil {
-			panic(err) 
+			panic(err)
 		}
-		
-		if len(rspProd.Kvs) == 0 || len(rspPilot.Kvs) == 0{
+
+		if len(rspProd.Kvs) == 0 || len(rspPilot.Kvs) == 0 {
 			logrus.Warn("Pilot or Prod version not found")
 		} else {
 			prodPath := string(rspProd.Kvs[len(rspProd.Kvs)-1].Key)
 			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
 			v.ProdVersion = path.Base(prodPath)
-			v.PilotVersion = path.Base(pilotPath)	
-			versionsChan <- v	
+			v.PilotVersion = path.Base(pilotPath)
+			v.Prsn = viper.GetString("REGISTRY_SERVICE")
+			versionsChan <- v
 		}
-		<- watchChan
+		<-watchChan
 	}
 }
 
