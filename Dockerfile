@@ -1,11 +1,12 @@
 FROM golang:alpine AS BUILDER
 RUN mkdir /build 
-ADD main.go /build/
-ADD alert_rules/alert-rules.yml.tmpl /build/
 WORKDIR /build
 ADD go.mod .
 ADD go.sum .
 RUN go mod download
+ADD main.go /build/
+ADD alert_rules/alert-rules.yml.tmpl /build/
+
 RUN go build -o main .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main .
 
