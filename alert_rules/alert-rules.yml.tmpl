@@ -15,6 +15,9 @@ groups:
       
     - record: request_duration_seconds_latency
       expr: request_duration_seconds_sum:sum_irate / request_duration_seconds_total:sum_irate
+    
+    - record: request_duration_seconds_error_rate:isNegligentProd
+      expr: request_duration_seconds_error_rate == bool 0 and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"})
 
     - record: request_duration_seconds_error_comparative
       expr: ((request_duration_seconds_error_rate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.PilotVersion}}"})) 
