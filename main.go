@@ -13,10 +13,9 @@ import (
 	"go.etcd.io/etcd/clientv3"
 )
 
-type Label struct {
+type Version struct {
 	PilotVersion string
 	ProdVersion  string
-	Prsn         string
 }
 
 func main() {
@@ -32,10 +31,10 @@ func main() {
 
 	defer cli.Close()
 
-	var labels Label
-	labelsChan := make(chan Label)
+	var versions Version
+	labelsChan := make(chan Version)
 
-	go labels.watchUpdatedVersions(cli, labelsChan)
+	go versions.watchUpdatedVersions(cli, labelsChan)
 
 	for {
 		select {
@@ -47,7 +46,7 @@ func main() {
 
 }
 
-func generateAlertFile(v Label) {
+func generateAlertFile(v Version) {
 	logrus.Info("Generate alert file")
 
 	tmpl, err := template.ParseFiles("/etc/prometheus/alert-rules.yml.tmpl")
@@ -66,7 +65,7 @@ func generateAlertFile(v Label) {
 	}
 }
 
-func (v Label) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Label) {
+func (v Version) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Version) {
 	watchChan := cli.Watch(context.TODO(), "/versions", clientv3.WithPrefix())
 
 	for {
@@ -83,7 +82,6 @@ func (v Label) watchUpdatedVersions(cli *clientv3.Client, versionsChan chan Labe
 			pilotPath := string(rspPilot.Kvs[len(rspPilot.Kvs)-1].Key)
 			v.ProdVersion = path.Base(prodPath)
 			v.PilotVersion = path.Base(pilotPath)
-			v.Prsn = viper.GetString("REGISTRY_SERVICE")
 			versionsChan <- v
 		}
 		<-watchChan

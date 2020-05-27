@@ -37,9 +37,9 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent more erros than version {{.ProdVersion}}
+        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent more erros in than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More Errors Than Previous Version
-        app: {{.Prsn}}
+        app: {{`"{{$labels.prsn}}"`}}
         addr: {{`"{{$labels.addr}}"`}}
 
     - alert: NewerVersionHas10PercentMoreTrafficThanPreviousVersion
@@ -48,9 +48,9 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent more traffic than version {{.ProdVersion}}
+        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent more traffic in than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More traffic Than Previous Version
-        app: {{.Prsn}}
+        app: {{`"{{$labels.prsn}}"`}}
         addr: {{`"{{$labels.addr}}"`}}
 
     - alert: NewerVersionHas10PercentLessTrafficThanPreviousVersion
@@ -59,9 +59,9 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent less traffic than version {{.ProdVersion}}
+        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent less traffic in than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent Less Traffic Than Previous Version
-        app: {{.Prsn}}
+        app: {{`"{{$labels.prsn}}"`}}
         addr: {{`"{{$labels.addr}}"`}}
 
     - alert: NewerVersionHas10PercentMoreLatencyThanPreviusVersion
@@ -70,7 +70,7 @@ groups:
       labels:
         severity: page
       annotations:
-        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent more latency than version {{.ProdVersion}}
+        description: URL {{`"{{$labels.addr}}"`}} in version {{.PilotVersion}} has 10 percent more latency in than version {{.ProdVersion}}
         summary: Newer Version Has 10 Percent More Latency Than Previous Version
-        app: {{.Prsn}}
+        app: {{`"{{$labels.prsn}}"`}}
         addr: {{`"{{$labels.addr}}"`}}
