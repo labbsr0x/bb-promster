@@ -35,7 +35,11 @@ groups:
         / ignoring(instance) (request_duration_seconds_latency and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.ProdVersion}}"}) )
     
     - alert: NewerVersionHas10PercentMoreErrorsThanPreviousVersion
-      expr: request_duration_seconds_error_comparative > 0.1     
+      expr: ( ( request_duration_seconds_error_comparative 
+        and ignoring (instance) request_duration_seconds_error_rate:isNegligentProd != 1 ) > 0.1 )
+        or 
+        ( ( request_duration_seconds_error_rate and ignoring(addr) sum by(instance, prsn) (application_info{version="{{.PilotVersion}}"})
+        and ignoring (instance) request_duration_seconds_error_rate:isNegligentProd == 1 ) > 0.1 )
       for: 4m
       labels:
         severity: page
