@@ -32,13 +32,13 @@ func main() {
 	defer cli.Close()
 
 	var versions Version
-	labelsChan := make(chan Version)
+	versionsChan := make(chan Version)
 
-	go versions.watchUpdatedVersions(cli, labelsChan)
+	go versions.watchUpdatedVersions(cli, versionsChan)
 
 	for {
 		select {
-		case versions := <-labelsChan:
+		case versions := <-versionsChan:
 			generateAlertFile(versions)
 			updatePrometheus()
 		}
