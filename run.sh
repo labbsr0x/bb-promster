@@ -86,8 +86,9 @@ fi
 
 if [[ "$ALERT_MANAGER_URLS" != "" ]]; then
     sed -i -e 's;$ALERT_RULES_FILE;'"- $ALERT_RULES_FILE"';g' "/prometheus.yml.tmpl"
-
-    cat >> "/prometheus.yml.tmpl" <<- EOM
+	if ! grep -q alerting: "/prometheus.yml.tmpl"; then
+  echo noalerting
+	cat >> "/prometheus.yml.tmpl" <<- EOM
 
 alerting:
   alertmanagers:
@@ -95,6 +96,7 @@ alerting:
     static_configs:
     - targets: ['$ALERT_MANAGER_URLS']
 EOM
+	fi
 else
     sed -i -e 's/$ALERT_RULES_FILE/'""'/g' "/prometheus.yml.tmpl"
 fi

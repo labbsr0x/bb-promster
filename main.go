@@ -93,6 +93,6 @@ func updatePrometheus() {
 	cmd := exec.Command("wget", "--post-data=''", "http://localhost:9090/-/reload", "-O", "-")
 	err := cmd.Run()
 	if err != nil {
-		panic(err)
+		logrus.Warn(err)
 	}
 }
